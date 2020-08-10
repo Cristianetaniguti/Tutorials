@@ -1,0 +1,11 @@
+digraph EmpiricalReads {
+  #rankdir=LR;
+  compound=true;
+
+  # Links
+  CALL_SNPCalling -> CALL_Maps
+
+  # Nodes
+  CALL_SNPCalling [label="call SNPCalling";shape="oval";peripheries=2]
+  CALL_Maps [label="call Maps";shape="oval";peripheries=2]
+}
