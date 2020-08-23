@@ -572,3 +572,23 @@ This is a PDF version of an HTML document, which has links as references to soft
 14 - http://augusto-garcia.github.io/onemap/vignettes_highres/Outcrossing_Populations.html
 
 15 - https://github.com/guilherme-pereira/vcf2sm
+
+# References
+
+Poplin, R., Ruano-Rubio, V., DePristo, M. A., Fennell, T. J., Carneiro, M. O., Auwera, G. A. Van der, … Banks, E. (2017). Scaling accurate genetic variant discovery to tens of thousands of samples. BioRxiv, 201178. https://doi.org/10.1101/201178
+
+Garrison, E., & Marth, G. (2012). Haplotype-based variant detection from short-read sequencing. ArXiv E-Prints, 9. https://doi.org/1207.3907
+
+Bilton, T. P., Schofield, M. R., Black, M. A., Chagné, D., Wilcox, P. L., & Dodds, K. G. (2018). Accounting for Errors in Low Coverage High-Throughput Sequencing Data When Constructing Genetic Maps Using Biparental Outcrossed Populations. Genetics, 209(1), 65–76. https://doi.org/10.1534/genetics.117.300627
+
+Pereira, G. S., Garcia, A. A. F., & Margarido, G. R. A. (2018). A fully automated pipeline for quantitative genotype calling from next generation sequencing data in polyploids. BMC Bioinformatics, Submitted, 1–10. https://doi.org/10.1186/s12859-018-2433-6
+
+Voorrips, R. E., & Maliepaard, C. A. (2012). The simulation of meiosis in diploid and tetraploid organisms using various genetic models. BMC Bioinformatics, 13(1), 248. https://doi.org/10.1186/1471-2105-13-248
+
+Serang, O., Mollinari, M., & Garcia, A. A. F. (2012). Efficient exact maximum a posteriori computation for bayesian SNP genotyping in polyploids. PLoS ONE, 7(2), 1–13. https://doi.org/10.1371/journal.pone.0030906
+
+Gerard, D., Ferrão, L. F. V., Garcia, A. A. F., & Stephens, M. (2018). Genotyping polyploids from messy sequencing data. Genetics, 210(3), 789–807. https://doi.org/10.1534/genetics.118.301468
+
+Clark, L. V., Lipka, A. E., & Sacks, E. J. (2019). polyRAD: Genotype Calling with Uncertainty from Sequencing Data in Polyploids and Diploids. G3: Genes, Genomes,Genetics, 9(March), g3.200913.2018. https://doi.org/10.1534/g3.118.200913
+
+Clark, L. V., Lipka, A. E., & Sacks, E. J. (2019). polyRAD: Genotype Calling with Uncertainty from Sequencing Data in Polyploids and Diploids. G3: Genes, Genomes,Genetics, 9(March), g3.200913.2018. https://doi.org/10.1534/g3.118.200913
