@@ -19,6 +19,7 @@ opts_knit$set(width=75)
 
 ```{r, echo=FALSE, results='hide', message=F, warning=FALSE}
 library(onemap)
+library(genotyping4onemap)
 library(ggplot2)
 ```
 
@@ -49,7 +50,7 @@ run_pedsim(chromosome = "Chr1", n.marker = 54, tot.size.cm = 100, centromere = 5
            n.ind = 200, mk.types = c("A1", "A2", "A3", "A4", "B1.5", "B2.6", "B3.7", 
                                      "C.8", "D1.9", "D1.10", "D1.11", "D1.12", "D1.13", 
                                      "D2.14", "D2.15", "D2.16", "D2.17", "D2.18"),
-           n.types = rep(3,18), pop = "F1", path.pedsim = "/home/rstudio/onemap_ht2/",
+           n.types = rep(3,18), pop = "F1", path.pedsim = "/home/cristiane/Programs/PedigreeSim/",
            name.mapfile = "mapfile.map", name.founderfile="founderfile.gen",
            name.chromfile="sim.chrom", name.parfile="sim.par",
            name.out="sim_out")
@@ -58,7 +59,7 @@ run_pedsim(chromosome = "Chr1", n.marker = 54, tot.size.cm = 100, centromere = 5
 run_pedsim(chromosome = c("Chr1", "Chr2"), n.marker = c(75, 75), 
            tot.size.cm = c(100,100), centromere = c(50,50),
            n.ind = 200, mk.types = c("A.H.B","C.A", "D.B"),
-           n.types = rep(50,3), pop = "F2", path.pedsim = "/home/rstudio/onemap_ht2/",
+           n.types = rep(50,3), pop = "F2", path.pedsim = "/home/cristiane/Programs/PedigreeSim/",
            name.mapfile = "mapfile_f2.map", name.founderfile="founderfile_f2.gen",
            name.chromfile="sim_f2.chrom", name.parfile="sim_f2.par",
            name.out="sim_f2")
@@ -97,7 +98,7 @@ The same output file from PedigreeSim, the `genotypes.dat` can be used to simula
 # Dominant markers are not supported then, simulate other dataset with only codominant markers
 run_pedsim(chromosome = "Chr1", n.marker = 42, tot.size.cm = 100, centromere = 50,
            n.ind = 200, mk.types = c("A1", "A2", "B3.7", "D1.9", "D1.10", "D2.14", "D2.15"),
-           n.types = rep(6,7), pop = "F1", path.pedsim = "/home/rstudio/onemap_ht2/",
+           n.types = rep(6,7), pop = "F1", path.pedsim = "/home/cristiane/Programs/PedigreeSim/",
            name.mapfile = "mapfile.map", name.founderfile="founderfile.gen",
            name.chromfile="sim.chrom", name.parfile="sim.par",
            name.out="sim_out")
@@ -133,7 +134,7 @@ plot(onemap_out.obj, all=F)
 run_pedsim(chromosome = c("Chr1", "Chr2"), n.marker = c(75, 75), 
            tot.size.cm = c(100,100), centromere = c(50,50),
            n.ind = 200, mk.types = c("A.H.B"),
-           n.types = 150, pop = "F2", path.pedsim = "/home/rstudio/onemap_ht2/",
+           n.types = 150, pop = "F2", path.pedsim = "/home/cristiane/Programs/PedigreeSim/",
            name.mapfile = "mapfile_f2.map", name.founderfile="founderfile_f2.gen",
            name.chromfile="sim_f2.chrom", name.parfile="sim_f2.par",
            name.out="sim_f2")
@@ -304,7 +305,7 @@ Here we want to compare the best map using updog counts simulations and updog, p
 for(depth in c(100, 50, 10)){
   run_pedsim(chromosome = "Chr1", n.marker = 42, tot.size.cm = 100, centromere = 50,
              n.ind = 200, mk.types = c("A1", "A2", "B3.7", "D1.9", "D1.10", "D2.14", "D2.15"),
-             n.types = rep(6,7), pop = "F1", path.pedsim = "/home/rstudio/onemap_ht2/",
+             n.types = rep(6,7), pop = "F1", path.pedsim = "/home/cristiane/Programs/PedigreeSim/",
              name.mapfile = "mapfile.map", name.founderfile="founderfile.gen",
              name.chromfile="sim.chrom", name.parfile="sim.par",
              name.out="sim_out")
