@@ -1,0 +1,62 @@
+digraph reads_simu {
+  #rankdir=LR;
+  compound=true;
+
+  # Links
+  CALL_FreebayesGenotyping -> CALL_JointReports
+  CALL_CreateAlignmentFromSimulation -> CALL_GatkGenotyping
+  CALL_ApplyRandomFilters -> SCATTER_0_VARIABLE_vcf
+  CALL_DefaultMaps -> CALL_JointReports
+  SCATTER_0_VARIABLE_vcf -> CALL_GusmapMaps
+  CALL_SimulatedMap -> CALL_DefaultMaps
+  CALL_CreateAlignmentFromSimulation -> CALL_SNPCallerMaps
+  CALL_vcf2onemap -> CALL_SNPCallerMaps
+  CALL_CreateAlignmentFromSimulation -> CALL_DefaultMaps
+  SCATTER_0_VARIABLE_vcf -> CALL_vcf2onemap
+  CALL_ApplyRandomFilters -> CALL_Gambis
+  CALL_SimulatedMap -> CALL_SNPCallerMaps
+  CALL_GatkGenotyping -> CALL_JointReports
+  CALL_Gambis -> CALL_ScatterAt138_13
+  CALL_FreebayesGenotyping -> CALL_ApplyRandomFilters
+  CALL_ScatterAt138_13 -> CALL_JointReports
+  CALL_CreateAlignmentFromSimulation -> CALL_ScatterAt138_13
+  CALL_CalculateVcfMetrics -> CALL_JointReports
+  CALL_GusmapMaps -> CALL_JointReports
+  CALL_CreateAlignmentFromSimulation -> CALL_SimulatedMap
+  CALL_Gambis -> CALL_GusmapMaps
+  CALL_CreateAlignmentFromSimulation -> CALL_FreebayesGenotyping
+  SCATTER_0_VARIABLE_vcf -> CALL_DefaultMaps
+  CALL_CreateAlignmentFromSimulation -> CALL_CalculateVcfMetrics
+  CALL_SimulatedMap -> CALL_ScatterAt138_13
+  CALL_FreebayesGenotyping -> CALL_CalculateVcfMetrics
+  SCATTER_0_VARIABLE_vcf -> CALL_Gambis
+  CALL_vcf2onemap -> CALL_DefaultMaps
+  CALL_SimulatedMap -> CALL_GusmapMaps
+  CALL_vcf2onemap -> CALL_ScatterAt138_13
+  CALL_GatkGenotyping -> CALL_ApplyRandomFilters
+  SCATTER_0_VARIABLE_vcf -> CALL_SNPCallerMaps
+  SCATTER_0_VARIABLE_vcf -> CALL_ScatterAt138_13
+  CALL_GatkGenotyping -> CALL_CalculateVcfMetrics
+  CALL_SNPCallerMaps -> CALL_JointReports
+  CALL_CreateAlignmentFromSimulation -> CALL_GusmapMaps
+
+  # Nodes
+  CALL_ApplyRandomFilters [label="call ApplyRandomFilters"]
+  CALL_CreateAlignmentFromSimulation [label="call CreateAlignmentFromSimulation";shape="oval";peripheries=2]
+  CALL_GatkGenotyping [label="call GatkGenotyping";shape="oval";peripheries=2]
+  CALL_SimulatedMap [label="call SimulatedMap";shape="oval";peripheries=2]
+  CALL_JointReports [label="call JointReports"]
+  CALL_FreebayesGenotyping [label="call FreebayesGenotyping";shape="oval";peripheries=2]
+  CALL_CalculateVcfMetrics [label="call CalculateVcfMetrics"]
+  subgraph cluster_0 {
+    style="filled,solid";
+    fillcolor=white;
+    CALL_SNPCallerMaps [label="call SNPCallerMaps";shape="oval";peripheries=2]
+    CALL_GusmapMaps [label="call GusmapMaps";shape="oval";peripheries=2]
+    CALL_ScatterAt138_13 [label="call ScatterAt138_13";shape="oval";peripheries=2]
+    SCATTER_0_VARIABLE_vcf [shape="hexagon" label="scatter over Pair[String, File] as vcf"]
+    CALL_DefaultMaps [label="call DefaultMaps";shape="oval";peripheries=2]
+    CALL_vcf2onemap [label="call vcf2onemap"]
+    CALL_Gambis [label="call Gambis"]
+  }
+}
