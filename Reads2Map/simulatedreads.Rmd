@@ -22,7 +22,7 @@ This workflow performs simulations of one or more (defined by `number_of_familie
 It also has the options to:
 
 * Include or not multiallelic (MNP) markers
-* Apply filters using `VCFtools`
+* Apply filters using `bcftools`
 
 This workflow uses:
 
@@ -88,7 +88,7 @@ You will need the following input information:
 
 **max_cores**: Maximum number of computer cores to be used
 
-**filters**: filters in to be applied by `VCFtools` in the VCF file after SNP calling
+**filters**: filters in to be applied by `bcftools` in the VCF file after SNP calling
 
 **chunk_size**: how many samples are to be evaluated by `GATK` in a single same node
 

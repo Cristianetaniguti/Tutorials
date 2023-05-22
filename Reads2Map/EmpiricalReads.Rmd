@@ -132,7 +132,7 @@ The `EmpiricalMaps` workflow receives as input VCF files from `EmpiricalSNPCalli
 It also has the options to:
 
 * Include or not multiallelic (MNP) markers
-* Apply filters using `VCFtools`
+* Apply filters using `bcftools`
 
 This workflow uses:
 
@@ -187,7 +187,7 @@ This workflow uses:
 
 **gatk_vcf_multi**: vcf file resulted from `MCHap`
 
-**filters**: specify filters to be applied by `VCFtools`
+**filters**: specify filters to be applied by `bcftools`
 
 ## Example of how to run
 
