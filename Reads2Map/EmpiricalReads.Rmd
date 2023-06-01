@@ -12,7 +12,7 @@ output:
 
 ### Overview
 
-The `EmpiricalSNPCalling` workflow performs the alignment of FASTQ to a reference genome, SNP calling with `GATK` tools (`HaplotypeCaller`, `GenomicsDBImport`, and `GenotypeGVCFs`) and `Freebayes`. The samples are split into chunks to be run in different nodes and optimize the analyses. Set the number of samples by chunk in the `chunk_size` input. Use `max_cores` to define the number of cores to be used in each node.
+The `EmpiricalSNPCalling` workflow performs the alignment of FASTQ to a reference genome, SNP calling with `GATK` tools (`HaplotypeCaller`, `GenomicsDBImport`, and `GenotypeGVCFs`), `TASSEL`, `STACKs` and `Freebayes`. The samples are split into chunks to be run in different nodes and optimize the analyses. Set the number of samples by chunk in the `chunk_size` input. Use `max_cores` to define the number of cores to be used in each node.
 
 The workflow also includes de options to:
 
@@ -24,7 +24,7 @@ The workflow also includes de options to:
 This workflow requires:
 
 * Diploid or polyploid specie
-* Single-end reads
+* Single-end and paired-end reads
 
 <center>
 
@@ -51,17 +51,26 @@ This workflow requires:
 ![freebayes_genotyping](images/freebayes_genotyping.svg)
 
 <br/><br/>
+
+![tassel_genotyping](images/tassel_genotyping.svg)
+
+<br/><br/>
+
+![stacks_genotyping](images/stacks_genotyping.svg)
+
+<br/><br/>
+
 </center>
 
 ### Input files
 
 The `EmpiricalSNPcalling` requires demultiplexed and cleaned FASTQ files. We made available a suggestion for preprocessing reads in `PreprocessingReads.wdl`.
 
-First, go to our [releases page](https://github.com/Cristianetaniguti/Reads2Map/releases) and download the assets of the most recent version of the `EmpiricalSNPCalling` workflow. 
+`EmpiricalSNPcalling` receive as inputs:
 
-You will need the following input information:
+**samples_info**: 
 
-**samples_info**: tsv file with the first column with the path to FASTQ files, a second column with sample names, and the third column with sample names and lane specifications. Example:
+For single-end reads: tsv file with the first column with the path to FASTQ files, a second column with sample names, and the third column with sample names and lane specifications. Example:
 
 ```
 tests/data/Ptremula_PRJNA395596_subset/fastq/SRR6249787.sub.fastq   I_3_55  I_3_55.Lib1_C09_AGAAGTC
@@ -70,6 +79,17 @@ tests/data/Ptremula_PRJNA395596_subset/fastq/SRR6249795.sub.fastq   PT_F    PT_F
 tests/data/Ptremula_PRJNA395596_subset/fastq/SRR6249808.sub.fastq   PT_M    PT_M.Lib2_E06_CGATGCG
 ```
 
+For pair-end reads: tsv file with the first column with the path to FASTQ files with forward reads (R1), a second column with the path to FASTQ files with reverse reads (R2), the third column with sample names, and the fourth column with sample names and lane specifications. Example:
+
+```
+tests/data/Ptremula_PRJNA395596_subset/fastq/SRR6249787.R1.sub.fastq    tests/data/Ptremula_PRJNA395596_subset/fastq/SRR6249787.R2.sub.fastq   I_3_55  I_3_55.Lib1_C09_AGAAGTC
+tests/data/Ptremula_PRJNA395596_subset/fastq/SRR6249787.R1.sub.fastq    tests/data/Ptremula_PRJNA395596_subset/fastq/SRR6249787.R2.sub.fastq   I_3_66  I_3_66.Lib1_D06_GCCAACT
+tests/data/Ptremula_PRJNA395596_subset/fastq/SRR6249787.R1.sub.fastq    tests/data/Ptremula_PRJNA395596_subset/fastq/SRR6249787.R2.sub.fastq   PT_F    PT_F.Lib1_E09_TGAACAT
+tests/data/Ptremula_PRJNA395596_subset/fastq/SRR6249787.R1.sub.fastq    tests/data/Ptremula_PRJNA395596_subset/fastq/SRR6249787.R2.sub.fastq   PT_M    PT_M.Lib2_E06_CGATGCG
+```
+
+**pair_end**: true if data set contain pair-end reads
+
 **ploidy**: specie ploidy
 
 **n_chrom**: specie number of chromosomes (this is used to parallelize `freebayes` in nodes)
@@ -77,6 +97,8 @@ tests/data/Ptremula_PRJNA395596_subset/fastq/SRR6249808.sub.fastq   PT_M    PT_M
 **chunk_size**: how many samples are to be evaluated by `GATK` in a single same node
 
 **max_cores**: maximum number of cores to be used by alignment and `freebayes` tasks
+
+**max_ram**: maximum raw allowed in `GATK` and `TASSEL` tasks
 
 **empirical.references**
 
@@ -116,18 +138,30 @@ docker run -v $(pwd):/data/ us.gcr.io/broad-gotc-prod/genomes-in-the-cloud:2.5.7
 
 **run_freebayes**: true for running `freebayes`
 
+**run_tassel**: true for running `TASSEL`
+
+**run_stacks**: true for running `STACKs`
+
+**enzyme**: enzyme name (required only if running `TASSEL`)
+
+**pop_map**: population map file (used running `STACKs`, if not specified a single populations is considered)
+
+**P1** and **P2**: used to filter markers by segregation if running `MCHap`
+
+The inputs: **GatkGenotyping.vcf_simu**, **GatkGenotyping.depth**, **FreebayesGenotyping.vcf_simu**, **GatkGenotyping.seed** can be ignored when running for Empirical reads. They are exclusive for simulations.
+
 The files outputted by `EmpiricalSNPCalling.wdl` are inputs for `EmpiricalMaps.wdl`. However, we suggest checking the VCF markers' quality parameters to apply proper filters before proceeding to `EmpiricalMaps.wdl`. The `EmpiricalMaps.wdl` is limited to running only one chromosome, make sure you filter the VCF to retain only the selected one.
 
 ## EmpiricalMaps
 
 ### Overview
 
-The `EmpiricalMaps` workflow receives as input VCF files from `EmpiricalSNPCalling` workflow and results in 34 linkage maps for a single chromosome running the combinations:
+The `EmpiricalMaps` workflow receives as input VCF files from `EmpiricalSNPCalling` workflow and results in linkage maps for a single chromosome running the possible combinations of:
 
-* SNP calling: `GATK` and `Freebayes`
+* SNP calling: `GATK`, `TASSEL`, `STACKs` and `Freebayes`
 * Dosage/genotype calling: `updog`, `polyRAD` and `SuperMASSA`
-* Linkage map build software: `OneMap` 3.0 and `GUSMap`
-* Using genotype probabilities from `GATK`, `Freebayes`, `updog`, `polyRAD` and `SuperMASSA`, and a global error rate of 5% and 0.001% in the `OneMap` HMM.
+* Linkage map build software: `OneMap` 3.0, `MAPpoly`, and `GUSMap`
+* Using genotype probabilities from `GATK`, `Freebayes`, `TASSEL`, `STACKs`, `updog`, `polyRAD` and `SuperMASSA`, and a global error rate of 5% and 0.001% in the `OneMap` or `MAPpoly` HMM.
 
 It also has the options to:
 
@@ -140,12 +174,6 @@ This workflow uses:
 * Genomic positions for markers order
 
 <center>
-
-**Workflow**
-
-![EmpiricalMaps](images/EmpiricalMaps.svg)
-
-<br/><br/>
 
 **Subworkflows**
 
@@ -161,17 +189,20 @@ This workflow uses:
 
 <br/><br/>
 
+![mappoly_maps_empirical](images/mappoly_maps_empirical.svg)
+
+<br/><br/>
+
 </center>
 
 ### Input files
 
-**freebayes_vcf**: vcf file containing markers from `freebayes` SNP calling
+**vcfs**: array with vcfs files. You can include one or more VCFs. It should be written in the format: "Maps.vcfs": ["path/to/vcf1.vcf", "path/to/vcf2.vcf", "path/to/vcf3.vcf"]
 
-**gatk_vcf**: vcf file containing markers from `GATK` SNP calling
+**vcfs_software**: array with SNP calling software used to generate each one of the specified VCFs in the **vcfs** input. Format example: "Maps.vcfs_software": ["GATK", "GATK", "freebayes"]
 
-**freebayes_vcf_bam_counts**: vcf file containing markers from `freebayes` SNP calling with AD field replaced by BAM files read counts
+**vcfs_counts_source**: array with counts source information of each one of the VCFs in the **vcfs** input. This feature is related with the option **ReplaceAD** described in the `EmpiricalSNPCalling` section. Format example: "Maps.vcfs_counts_source": ["VCF", "BAM", "VCF"]
 
-**gatk_vcf_bam_counts**: vcf file containing markers from `GATK` SNP calling with AD field replaced by BAM files read counts
 
 **dataset**
 - parent1: parent 1 ID
@@ -185,82 +216,17 @@ This workflow uses:
 
 **gatk_mchap**: true if `MCHap` was used in `GATK` results
 
-**gatk_vcf_multi**: vcf file resulted from `MCHap`
+**gatk_vcf_multi**: vcf file resulted from `MCHap` (only required if **gatk_mchap** is true)
 
 **filters**: specify filters to be applied by `bcftools`
 
-## Example of how to run
+**filter_segr**: TRUE to filter markers by segregation distortion
 
-Once you have all the input files, there are some options to run the workflow. See more about it on the [openwdl page](https://github.com/openwdl/wdl). 
+**filter_noninfo**: filter out markers that are not informative (aa x bb, aa x NA, or vice-versa in outcrossing populations) before running the genotype/dosage calling
 
-One example is using the [`cromwell`](https://cromwell.readthedocs.io/en/stable/) engine. `Cromwell` offers different backend configurations that allow running the workflows in different management systems such as `SLURM` and `SGE`. It is also possible to set configurations to use singularity containers and `MySQL` database to keep a cache of runs. Check some of this configurations options in our [configurations files](https://github.com/Cristianetaniguti/Reads2Map/tree/main/.configurations). You can see further information about all options available in [its documentation](https://cromwell.readthedocs.io/en/stable/). To run the workflow through `cromwell`, you will need first an input file. Use the [womtool](https://github.com/broadinstitute/cromwell/releases) to generate the inputs template:
+**prob_thres**: define threshold for filtering genotypes by their genotype probabilities
 
-```{bash, eval=FALSE}
-java -jar womtool.jar inputs EmpiricalSNPCalling_v1.0.0.wdl > EmpiricalSNPCalling.inputs.json
-```
+**ploidy**: define specie ploidy. If 2, the workflow will run OneMap and GUSMap, if higher than 2, it will run MAPpoly.
 
-Adapt the input files paths and run cromwell:
-
-```
-Execute the workflow
-java -jar /path/to/cromwell.jar run -p EmpiricalSNPCalling_v1.0.0.zip -i EmpiricalSNPCalling.inputs.json EmpiricalSNPCalling_v1.0.0.wdl
-```
-
-**Warning**: This analysis demand high computer capacity to run. Check some examples of configurations in `.configurations` directory. Here are two examples of how to use them:
-
-* For storing the metadata and cache in a `MySQL` database (see also [cromwell-cli](https://github.com/lmtani/cromwell-cli) for easy access to metadata):
-
-```
-# Open mySQL cointainer
-docker run -d -v banco_cromwell:/var/lib/mysql --rm --name mysql-cromwell -p 3307:3306 -e MYSQL_ROOT_PASSWORD=1234 -e MYSQL_DATABASE=cromwell mysql:5.7
-
-# Execute the workflow
-java -jar -Dconfig.file=.configurations/cromwell_mysql.conf -jar cromwell.jar run -p EmpiricalSNPCalling_v1.0.0.zip -i EmpiricalSNPCalling.inputs.json EmpiricalSNPCalling_v1.0.0.wdl
-
-# Or execute the workflow through the server interface
-java -jar -Dconfig.file=.configurations/cromwell_mysql.conf -jar cromwell.jar server
-```
-
-In case you use the server interface, you must open it in your browser in the pointed local address and submit the input (`.json`), workflow (`.wdl`), and the directories struct and tasks compressed (`.zip`).
-
-* If you are using a High-Performance Computing (HPC) with slurm management system:
-
-BATCH file named `slurm_main.sh`:
-
-```
-#!/bin/bash
-
-#SBATCH --export=NONE
-#SBATCH -J cromwell_Reads2Map
-#SBATCH --nodes=1                    
-#SBATCH --mem=1G
-#SBATCH --time=01:30:00
-#SBATCH -o /home/user/Reads2Map.log
-#SBATCH -e /home/user/Reads2Map.err
-
-# Maybe it will be required to import java and singularity modules here. Check the specifications of the HPC.
-#module load singularity
-#module load java
-
-java -jar -Dconfig.file=/home/user/Reads2Map/.configurations/cromwell_no_mysql.conf \
-     -jar /home/user/Reads2Map/cromwell-65.jar \
-     run /home/user/Reads2Map/EmpiricalSNPCalling_v1.0.0.wdl \
-     -p EmpiricalSNPCalling_v1.0.0.zip \
-     -i /home/user/Reads2Map/inputs/EmpiricalSNPCalling.inputs.json 
-```
-
-When the run is ended, the log description printed on the screen will point to the path for the workflow output files. 
-
-## Generating the workflows graphs
-
-The figures of this tutorial were generated using `womtool` and `graphviz`. Example:
-
-```{bash, eval=FALSE}
-java -jar womtool-84.jar graph EmpiricalSNPCalling.wdl > EmpiricalSNPCalling.gv   
-dot -Tsvg EmpiricalSNPCalling.gv > EmpiricalSNPCalling.svg
-```
-
-## Visualize `Reads2Map` workflows output in `Reads2MapApp`
-
-You can search for all workflow's intermediary files in the `cromwell-executions` directory generated by the Cromwell. The `log` file will specify the workflow id and path for each executed task. The final output of `EmpiricalMaps.wdl` and `SimulatedReads.wdl` are compressed files called `EmpiricalReads_results.tar.gz` and `SimulatedReads_results.tar.gz`. These files contain tables for an overview of the entire procedure. They are inputs for the `Reads2MapApp`, a shiny app that provides a graphical view of the results. Check the [Reads2MapApp repository](https://github.com/Cristianetaniguti/Reads2MapApp) for further information.
+**replaceADbyMissing**: if true, it replace the allele depth (AD) field in input VCF file by missing (0,0) if the genotype (GT) is missing (./.)
 
