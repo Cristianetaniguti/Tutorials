@@ -126,9 +126,9 @@ I simple added the `module load WebProxy` just before running singularity:
 
 # Run Reads2Map WDL workflows
 
-## Aspen diploid RADseq example data
+We will use a subset of the Aspen diploid RADseq data (BioProject PRJNA395596) to exemplify the usage of the Reads2Map workflows.
 
-### Run SNPCalling
+## Run SNPCalling
 
 #### Download materials
 

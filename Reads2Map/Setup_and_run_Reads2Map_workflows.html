@@ -1513,8 +1513,7 @@ Prism.languages.r={comment:/#.*/,string:{pattern:/(['"])(?:\\.|(?!\1)[^\\\r\n])*
             <li><a href="#run-reads2map-wdl-workflows">Run Reads2Map WDL
             workflows</a>
             <ul>
-            <li><a href="#aspen-diploid-radseq-example-data">Aspen
-            diploid RADseq example data</a></li>
+            <li><a href="#run-snpcalling">Run SNPCalling</a></li>
             <li><a href="#run-maps">Run Maps</a></li>
             <li><a href="#visualize-results">Visualize results</a></li>
             <li><a href="#adapt-tasks-and-run-sub-workflows">Adapt tasks
@@ -1715,10 +1714,10 @@ running singularity:</p>
 </div>
 <div id="run-reads2map-wdl-workflows" class="section level1">
 <h1>Run Reads2Map WDL workflows</h1>
-<div id="aspen-diploid-radseq-example-data" class="section level2">
-<h2>Aspen diploid RADseq example data</h2>
-<div id="run-snpcalling" class="section level3">
-<h3>Run SNPCalling</h3>
+<p>We will use a subset of the Aspen diploid RADseq data (BioProject
+PRJNA395596) to exemplify the usage of the Reads2Map workflows.</p>
+<div id="run-snpcalling" class="section level2">
+<h2>Run SNPCalling</h2>
 <div id="download-materials" class="section level4">
 <h4>Download materials</h4>
 <pre class="bash"><code>mkdir Reads2Map_tutorial
@@ -1880,7 +1879,6 @@ tail -n 100 cromwell.out</code></pre>
   },
   &quot;id&quot;: &quot;34cf00db-9ba8-4eb2-97fd-975eb58a686a&quot;
 }</code></pre>
-</div>
 </div>
 </div>
 <div id="run-maps" class="section level2">
