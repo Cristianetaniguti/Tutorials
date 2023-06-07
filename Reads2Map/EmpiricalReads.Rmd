@@ -98,7 +98,7 @@ tests/data/Ptremula_PRJNA395596_subset/fastq/SRR6249787.R1.sub.fastq    tests/da
 
 **max_cores**: maximum number of cores to be used by alignment and `freebayes` tasks
 
-**max_ram**: maximum raw allowed in `GATK` and `TASSEL` tasks
+**max_ram**: maximum raw allowed in `GATK` and `TASSEL` tasks (megabyte)
 
 **empirical.references**
 

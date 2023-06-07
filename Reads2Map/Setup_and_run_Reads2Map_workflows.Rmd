@@ -14,9 +14,9 @@ output:
 <img src="images/overview.png" alt="app-screen" width="600"/> 
 <p/>
 
-# Why using Reads2Map workflows?
+# Why use Reads2Map workflows?
 
-* **Getting good quality markers from sequencing data for linkage map building**: Reads2Map simplifies the execution of commonly used tools for SNP and genotype/dosage calling, as well as linkage map building, specifically designed for a subset of the data. It provides a user-friendly interface to easily run these tools. The generated output from Reads2Map can be conveniently uploaded to the Reads2MapApp, which generates diagnostic graphics. These graphics serve as a valuable resource in selecting the optimal pipeline for your specific data set. By leveraging Reads2Map and the accompanying app, you can streamline your data analysis and make informed decisions based on the diagnostic visuals provided.
+* **Get good quality markers from sequencing data for linkage map building**: Reads2Map simplifies the execution of commonly used tools for SNP and genotype/dosage calling, as well as linkage map building, specifically designed for a subset of the data. It provides a user-friendly interface to easily run these tools. The generated output from Reads2Map can be conveniently uploaded to the Reads2MapApp, which generates diagnostic graphics. These graphics serve as a valuable resource in selecting the optimal pipeline for your specific data set. By leveraging Reads2Map and the accompanying app, you can streamline your data analysis and make informed decisions based on the diagnostic visuals provided.
 
 * **FAIR principles (Findability, Accessibility, Interoperability, and Reuse)**: the usage of Docker/Singularity containers provide version control of the operational system and all software used to run the analysis in each one of the tasks. Furthermore, the WDL structure guarantee that the inputs and outputs of each tasks are communication the same way. These features make the Reads2Map analysis to be the same independent of which machine you run it. It could be different operation system, in local, HPC or Cloud environments. These workflows are also available in multiple platforms such as GitHub, SciCrunch, biotools, and workflowhub.
 
@@ -24,7 +24,7 @@ output:
 
 * **Collaborative work**: the WDL structure and related tools have a large and active developer community that consistently releases updates to improve workflow execution. These updates enhance performance, fix bugs, and introduce new features, ensuring a streamlined and efficient experience for users. The collaborative efforts of the community foster innovation and adaptability to meet evolving user needs. The SNP and dosage/genotype calling, as well as linkage map building software, have a large community of users who apply these tools in various contexts. Reads2Map simplifies the execution of pipelines and offers analysis diagnostic graphics to assess linkage map quality. The feedback from these diverse users, utilizing the software in different contexts, plays a crucial role in enhancing and expanding Reads2Map's features. This valuable user feedback drives continuous improvement and ensures that Reads2Map remains a versatile and effective tool for its community.
 
-* **Tools for running and visualizing the process**: the expansive community behind the evolution of WDL workflows has led to the development of various tools that aid in setting up, running, controlling, and visualizing the process. In this tutorial, we utilize the cromwell-cli and Caper tools, but there are numerous other options available that you can explore. Additionally, Reads2Map offers a complementary shiny app that facilitates the swift generation of diagnostic graphics for linkage maps.
+* **Tools for running and visualizing the process**: the expansive community behind the evolution of WDL workflows has led to the development of various tools that aid in setting up, running, controlling, and visualizing the process. In this tutorial, we utilize the Pumbaa and Caper tools, but there are numerous other options available that you can explore. Additionally, Reads2Map offers a complementary shiny app that facilitates the swift generation of diagnostic graphics for linkage maps.
 
 # Setup to run WDL workflows
 
@@ -32,34 +32,34 @@ You can find a couple of ways of running WDL workflows at the [OpenWDL github pa
 
 1) You do not have enough local computational resources neither access to a HPC: use [Terra.bio](https://terra.bio/)
 
-2) You have enough local computational resources: use the wrapper [cromwell-cli](https://github.com/lmtani/cromwell-cli)
+2) You have enough local computational resources: use the tool [Pumbaa](https://github.com/lmtani/pumbaa)
 
 3) You do not have enough local computational resources but have access to a HPC: use the wrapper [Caper](https://github.com/ENCODE-DCC/caper)
 
 ## Setup in Terra.bio
 
-What we like in `Terra.bio`: We consider the most practical way of running a WDL workflow; provides many ways of visualization of the processes; community support
+What we like about `Terra.bio`: We consider the most practical way of running a WDL workflow; provides many ways of visualization of the processes; community support
 
 The easiest way of running the Reads2Map workflows is using the Terra.bio platform. The Broad Institute team provide comprehensive tutoriais on how to manage Terra interface, how to submit your data and the Cloud service price evaluation. You can pull Reads2Map workflows from the workflowhub: [EmpiricalReads2Map](https://doi.org/10.48546/WORKFLOWHUB.WORKFLOW.409.1) and [SimulatedReads2Map](https://doi.org/10.48546/WORKFLOWHUB.WORKFLOW.410.1)
 
-## Setup to run locally with `cromwell-cli`
+## Setup to run locally with `Pumbaa`
 
-What we like in `cromwell-cli`: easy to install and use;  easy setup of server and Call cache; many options of visualization of the process.
+What we like about `Pumbaa`: easy to install and use;  easy setup of server and Call cache; many options of visualization of the process.
 
-The `cromwell-cli` tool was developed by one of Reads2Map authors (Lucas Taniguti) and provides a easy way to set up, run the workflows, visualize the submitted runs status, and search for results. It requires [`Docker`]().
+The `Pumbaa` tool was developed by one of Reads2Map authors (Lucas Taniguti) and provides a easy way to set up, run the workflows, visualize the submitted runs status, and search for results. It requires [`Docker`]().
 
 ```{bash, eval=FALSE}
-curl https://raw.githubusercontent.com/lmtani/cromwell-cli/main/install.sh | bash
+curl https://raw.githubusercontent.com/lmtani/pumbaa/main/install.sh | bash
 
 # updated with build
-wget https://github.com/lmtani/cromwell-cli/releases/download/v0.10.0/cromwell-cli_Linux_x86_64.tar.gz
-tar -xf cromwell-cli_Linux_x86_64.tar.gz
+wget https://github.com/lmtani/pumbaa/releases/download/v0.10.0/pumbaa_Linux_x86_64.tar.gz
+tar -xf pumbaa_Linux_x86_64.tar.gz
 
 # Get cromwell.jar (check for new releases here: https://github.com/broadinstitute/cromwell/releases)
 wget https://github.com/broadinstitute/cromwell/releases/download/85/cromwell-85.jar
 
 # Check if it is working 
-./cromwell-cli
+./pumbaa
 
 # Start a new mysql server with 
 docker run -d --rm --name cromwell-db -p 3307:3306 -e MYSQL_ROOT_PASSWORD=1234 -e MYSQL_DATABASE=cromwell mysql:5.7
@@ -73,11 +73,11 @@ wget https://github.com/Cristianetaniguti/Reads2Map/raw/develop/.configurations/
 java -Dconfig.file=cromwell_mysql.conf -jar cromwell-85.jar server # Run and leave it open in a terminal, use Ctrl+C to exit when you finish to run all your analysis
 ```
 
-Let the server running in a terminal e open another to submit the jobs as described in the section [`Run workflows`](#Run-workflows)
+Leave the server running in a terminal and open another to submit the jobs as described in the section [`Run workflows`](#Run-workflows)
 
 ## Setup to run in High performance computing (HPC) with `Caper`
 
-What we like in `Caper`: do not require MySQL to Call Cache; adaptability to different systems; provide easy way to edit backend in case of HPC specificity; easy to use
+What we like about `Caper`: do not require MySQL to Call Cache; adaptability to different systems; provide easy way to edit backend in case of HPC specificity; easy to use
 
 Install `Caper` with pip:
 
@@ -85,7 +85,7 @@ Install `Caper` with pip:
 module load GCCcore/12.2.0 Python/3.10.8  # Libraries required for using pip in my specific HPC (search the ones in yours)
 module load Java/17.0.2 # Java will also be required to run Caper
 pip install --target=/scratch/user/chtaniguti/caper caper  # I didn't install it in the home directory because I have limited space/number of files there
-export PATH=$PATH:/scratch/user/chtaniguti/caper/bin/ # Add executable to the .bashrc file usually located in the home directory
+export PATH=$PATH:/scratch/user/chtaniguti/caper/bin/ # You can add this line to the .bashrc file usually located in the home directory to avoid the need of running it every time you connect
 ```
 
 Caper has many options for configurations depending on your system. Here, we show how to run in an HPC with slurm management system and singularity containers. Please, check [Caper documentation](https://github.com/ENCODE-DCC/caper/blob/master/DETAILS.md) for other options.
@@ -95,7 +95,7 @@ Caper has many options for configurations depending on your system. Here, we sho
 caper init slurm 
 ```
 
-As I said before, I don't have much space in my home directory, so I opened the `default.conf` file and changed the `local-loc-dir`. I also changed the resources for the leader job, reducing the default time and memory because we are running just a subset in this tutorial.
+As I said before, I don't have much space in my home directory, so I opened the `default.conf` file and changed the `local-loc-dir`. I also changed the resources for the leader job, reducing the default time and memory because we are running just a subset in this tutorial. Check [here](https://github.com/ENCODE-DCC/caper/blob/master/docs/resource_param.md) other options of configuration in `default.conf`.
 
 ```console
 local-loc-dir=/scratch/user/chtaniguti/caper
@@ -103,11 +103,9 @@ local-loc-dir=/scratch/user/chtaniguti/caper
 slurm-leader-job-resource-param=-t 2:00:00 --mem 4G
 ```
 
-Another change was the time of the leader job because this is a subset, we will not need much time and memory. Check [here](https://github.com/ENCODE-DCC/caper/blob/master/docs/resource_param.md) other options of configuration in `default.conf`.
+To pull the singularity images, we will need to have internet access. My HPC requires a specific module to provide internet access to the nodes. Because of these particularity, I needed to modify the backend configurations of caper. They explain how to do it in [this section](https://github.com/ENCODE-DCC/caper/blob/master/DETAILS.md#how-to-override-capers-built-in-backend) of their documentation. Also, because of the space, I need to modify the default directories for singularity cache and images.
 
-To pull the singularity images, we will need to have internet access. Another particularity of my HPC is that it requires a specific module to provide internet access to the nodes. Because of these particularity, I needed to modify the backend configurations of caper. They explain how to do it in [this section](https://github.com/ENCODE-DCC/caper/blob/master/DETAILS.md#how-to-override-capers-built-in-backend) of their documentation. Also, because of the space, I need to modify the default directories for singularity cache and images.
-
-I simple added the `module load WebProxy` just before running singularity:
+I simply added the `module load WebProxy` and the singularity files paths just before running singularity to the slurm configuration code:
 
 ```
     mkdir -p $HOME/.singularity/lock/
@@ -196,7 +194,7 @@ See [inputs description](https://cristianetaniguti.github.io/Tutorials/Reads2Map
 }
 ```
 
-Edit also the path in `samples_info_pop_sub.tsv`:
+Also edit the path in `samples_info_pop_sub.tsv`:
 
 ```
 /home/chtaniguti/Reads2Map_tutorial/SRR6249787.sub.fastq   I_3_55  I_3_55.Lib1_C09_AGAAGTC
@@ -210,7 +208,7 @@ See an sample file format example for `pair-end` reads [here](https://github.com
 #### If running locally with Docker
 
 ```{bash, eval=FALSE}
-cromwell-cli submit -w EmpiricalSNPCalling_develop.wdl -i EmpiricalSNPCalling_develop.inputs.json -d EmpiricalSNPCalling_develop.zip
+pumbaa submit -w EmpiricalSNPCalling_develop.wdl -i EmpiricalSNPCalling_develop.inputs.json -d EmpiricalSNPCalling_develop.zip
 ```
 
 ```console
@@ -221,7 +219,7 @@ cromwell-cli submit -w EmpiricalSNPCalling_develop.wdl -i EmpiricalSNPCalling_de
 You can check the job log in the terminal that the server is on. Or also check the job status with:
 
 ```{bash, eval=FALSE}
-cromwell-cli q
+pumbaa q
 ```
 
 ```console
@@ -235,7 +233,7 @@ cromwell-cli q
 More details:
 
 ```{bash, eval=FALSE}
-cromwell-cli metadata -o 392e2620-5174-4a0d-8ce3-15d71ce52bf4 
+pumbaa metadata -o 392e2620-5174-4a0d-8ce3-15d71ce52bf4 
 ```
 
 ```console
@@ -264,7 +262,7 @@ Once is done:
 Check the output paths:
 
 ```{bash, eval=FALSE}
-cromwell-cli outputs -o 392e2620-5174-4a0d-8ce3-15d71ce52bf4
+pumbaa outputs -o 392e2620-5174-4a0d-8ce3-15d71ce52bf4
 ```
 
 ```console
@@ -295,7 +293,7 @@ cromwell-cli outputs -o 392e2620-5174-4a0d-8ce3-15d71ce52bf4
 Or interactively navigate through the tasks:
 
 ```{bash, eval=FALSE}
-cromwell-cli navigate -o 392e2620-5174-4a0d-8ce3-15d71ce52bf4
+pumbaa navigate -o 392e2620-5174-4a0d-8ce3-15d71ce52bf4
 ```
 
 ```console
@@ -329,7 +327,7 @@ caper hpc list
 
 If required to abort the job, use `caper hpc abort <JOBID>`
 
-You can check the workflow log open the file named slurm-<JOBID>. The location of the outputs will be printed at the end of the log file. 
+You can check the workflow log by opening the file named slurm-<JOBID>. The location of the outputs will be printed at the end of the log file. 
 
 ```{bash, eval=FALSE}
 tail -f cromwell.out # Exit with Ctrl-C
@@ -407,13 +405,13 @@ See [inputs description](https://cristianetaniguti.github.io/Tutorials/Reads2Map
 #### If running locally with Docker
 
 ```{bash, eval=FALSE}
-cromwell-cli submit -w EmpiricalMaps_develop.wdl -i EmpiricalMaps_develop.inputs.json -d EmpiricalMaps_develop.zip
+pumbaa submit -w EmpiricalMaps_develop.wdl -i EmpiricalMaps_develop.inputs.json -d EmpiricalMaps_develop.zip
 ```
 
-Once it finish:
+Once it finishes:
 
 ```{bash, eval=FALSE}
-cromwell-cli q
+pumbaa q
 ```
 
 ```console
@@ -426,7 +424,7 @@ cromwell-cli q
 ```
 
 ```{bash, eval=FALSE}
-cromwell-cli outputs -o 8e27954a-f477-4db0-a2c9-70f86314914e
+pumbaa outputs -o 8e27954a-f477-4db0-a2c9-70f86314914e
 ```
 
 ```{bash, eval=FALSE}
@@ -464,11 +462,11 @@ Explore all tabs:
 
 ![](images/exp_tabs.png)
 
-Here are some characteristics that you should check before taking your decision:
+Here are some characteristics that you should check before making your decision:
 
 * **Marker ordering**: Check the recombination fraction heatmap and the cMxMb graphic to check if the genomic order agrees with your data set order. If individual markers disagree, you can consider them errors and they should be removed in further steps, but if a group of markers (a fragment) disagree, maybe there is one inversion or translocation. 
 
-* **Marker quality**: If all markers are in correct markers but the linkage map has inflated size, it could be due to high error rate amoung the genotypes. Choose one approach that approximates the linkage map size to the size expected (about 100-150 cM if entire chromosome).
+* **Marker quality**: If all markers are in correct order but the linkage map has inflated size, it could be due to high error rate among the genotypes. Choose one approach that approximates the linkage map size to the size expected (about 100-150 cM if entire chromosome).
 
 * **Marker coverage**: Check how the markers are distributed in the genome. Avoid approaches that do not detect markers in a large portion of the genome.
 
@@ -490,7 +488,7 @@ This will only contain the biallelic markers. If you wish to add the multialleli
 /scratch/user/chtaniguti/Reads2Map/Maps/1f1cced3-fca2-418c-8c36-f8fc4b22ceb5/call-splitgeno/shard-0/execution/multiallelics.vcf.gz
 ```
 
-Finding these intermediary files can be a bit tricky due to the high number of directories generated. If you are using `cromwell-cli`, the `navigate` function can be useful for that. The graphs generated by `womtools` and a available at the [workflows description documents](https://cristianetaniguti.github.io/Tutorials/Reads2Map/EmpiricalReads.html) are also useful to help you to identify the files location.
+Finding these intermediary files can be a bit tricky due to the high number of directories generated. If you are using `pumbaa`, the `navigate` function can be useful for that. The graphs generated by `womtools` and are available at the [workflows description documents](https://cristianetaniguti.github.io/Tutorials/Reads2Map/EmpiricalReads.html) are also useful to help you to identify the files location.
 
 ## Adapt tasks and run sub-workflows
 
@@ -560,10 +558,10 @@ task RunFreebayes {
 
 ```
 
-After all modifications, you will need to adapt the workflow to be run by cromwell-cli or Caper because these tools do not accept imports structure present in Reads2Map. To do that, use:
+After all modifications, you will need to adapt the workflow to be run by Pumbaa or Caper because these tools do not accept imports structure present in Reads2Map. To do that, use:
 
 ```{bash, eval=FALSE}
-cromwell-cli build -wdl Reads2Map/pipelines/EmpiricalSNPCalling.wdl
+pumbaa build -wdl Reads2Map/pipelines/EmpiricalSNPCalling.wdl
 ```
 
 The adapted WDL and its dependencies .zip will be available at the `releases` directory. 
@@ -572,10 +570,10 @@ The adapted WDL and its dependencies .zip will be available at the `releases` di
 
 Example:
 
-Choose which subworkflow do you want to run in `subworkflows/` and adapt it to run with cromwell-cli and Caper:
+Choose which subworkflow you want to run in `subworkflows/` and adapt it to run with Pumbaa and Caper:
 
 ```{bash, eval=FALSE}
-cromwell-cli build -wdl Reads2Map/subworkflows/gatk_genotyping.wdl
+pumbaa build -wdl Reads2Map/subworkflows/gatk_genotyping.wdl
 ```
 
 The adapted WDL and its dependencies .zip will be available at the `releases` directory. 
