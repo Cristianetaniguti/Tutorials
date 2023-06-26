@@ -6,7 +6,7 @@
     <meta name="generator" content="pandoc" />
 
     
-        <meta name="date" content="2023-06-07" />
+        <meta name="date" content="2023-06-26" />
     
     <title>Setup and run Reads2Map workflows</title>
 
@@ -1532,7 +1532,7 @@ Prism.languages.r={comment:/#.*/,string:{pattern:/(['"])(?:\\.|(?!\1)[^\\\r\n])*
       <h1 class="title">Setup and run Reads2Map workflows</h1>
       
       <p class="authors">
-         <p class="date"><span class="glyphicon glyphicon-calendar"></span> 2023-06-07</p>
+         <p class="date"><span class="glyphicon glyphicon-calendar"></span> 2023-06-26</p>
            
 
    
@@ -1636,30 +1636,15 @@ process.</p>
 authors (Lucas Taniguti) and provides a easy way to set up, run the
 workflows, visualize the submitted runs status, and search for results.
 It requires <a href><code>Docker</code></a>.</p>
-<pre class="bash"><code>curl https://raw.githubusercontent.com/lmtani/pumbaa/main/install.sh | bash
+<pre class="bash"><code># Download and install Pumbaa
+curl https://raw.githubusercontent.com/lmtani/pumbaa/main/install.sh | bash
 
-# updated with build
-wget https://github.com/lmtani/pumbaa/releases/download/v0.10.0/pumbaa_Linux_x86_64.tar.gz
-tar -xf pumbaa_Linux_x86_64.tar.gz
-
-# Get cromwell.jar (check for new releases here: https://github.com/broadinstitute/cromwell/releases)
-wget https://github.com/broadinstitute/cromwell/releases/download/85/cromwell-85.jar
-
-# Check if it is working 
-./pumbaa
-
-# Start a new mysql server with 
-docker run -d --rm --name cromwell-db -p 3307:3306 -e MYSQL_ROOT_PASSWORD=1234 -e MYSQL_DATABASE=cromwell mysql:5.7
-
-docker start cromwell-db
-
-# download configuration file and change according to resources
-wget https://github.com/Cristianetaniguti/Reads2Map/raw/develop/.configurations/cromwell_mysql.conf
-
-# start server
-java -Dconfig.file=cromwell_mysql.conf -jar cromwell-85.jar server # Run and leave it open in a terminal, use Ctrl+C to exit when you finish to run all your analysis</code></pre>
-<p>Leave the server running in a terminal and open another to submit the
-jobs as described in the section <a href="#Run-workflows"><code>Run workflows</code></a></p>
+# Download Cromwell and follow instructions to start Mysql and Cromwell server:
+pumbaa local-deploy</code></pre>
+<p>The <code>local-deploy</code> command will give instructions on how
+to start a MySQL and Cromwell server. Leave the server running in a
+terminal and open another to submit the jobs as described in the section
+<a href="#Run-workflows"><code>Run workflows</code></a></p>
 </div>
 <div id="setup-to-run-in-high-performance-computing-hpc-with-caper" class="section level2">
 <h2>Setup to run in High performance computing (HPC) with
@@ -1969,11 +1954,11 @@ agrees with your data set order. If individual markers disagree, you can
 consider them errors and they should be removed in further steps, but if
 a group of markers (a fragment) disagree, maybe there is one inversion
 or translocation.</p></li>
-<li><p><strong>Marker quality</strong>: If all markers are in correct
-order but the linkage map has inflated size, it could be due to high
-error rate among the genotypes. Choose one approach that approximates
-the linkage map size to the size expected (about 100-150 cM if entire
-chromosome).</p></li>
+<li><p><strong>Marker quality</strong>: If all markers are in a correct
+order but the linkage map has an inflated size, it could be due to a
+high error rate among the genotypes. Choose one approach that
+approximates the linkage map size to the size expected (about 100-150 cM
+if the entire chromosome).</p></li>
 <li><p><strong>Marker coverage</strong>: Check how the markers are
 distributed in the genome. Avoid approaches that do not detect markers
 in a large portion of the genome.</p></li>
@@ -1982,9 +1967,9 @@ distributed in the linkage map. Avoid big gaps (higher than about 10
 cM).</p></li>
 <li><p><strong>Marker type</strong>: In outcrossing populations, it is
 important to have markers that have recombination information for both
-parents. These are the ab x aa (OneMap notation: D1.10), aa x ab (OneMap
+parents. These are ab x aa (OneMap notation: D1.10), aa x ab (OneMap
 notation: D2.15), and ab x ab (OneMap notation: B3.7). Avoid approaches
-that provides only ab x aa or aa x ab in a single chromosome.</p></li>
+that provide only ab x aa or aa x ab in a single chromosome.</p></li>
 </ul>
 <p>Once you selected the approach that provides the best results for
 your data set, you can input the respective VCF file into R and follow

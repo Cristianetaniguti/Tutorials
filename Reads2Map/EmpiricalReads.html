@@ -6,7 +6,7 @@
     <meta name="generator" content="pandoc" />
 
     
-        <meta name="date" content="2023-06-07" />
+        <meta name="date" content="2023-06-26" />
     
     <title>Building Linkage Maps from Empirical Reads</title>
 
@@ -1510,7 +1510,7 @@ Prism.languages.r={comment:/#.*/,string:{pattern:/(['"])(?:\\.|(?!\1)[^\\\r\n])*
       <h1 class="title">Building Linkage Maps from Empirical Reads</h1>
       
       <p class="authors">
-         <p class="date"><span class="glyphicon glyphicon-calendar"></span> 2023-06-07</p>
+         <p class="date"><span class="glyphicon glyphicon-calendar"></span> 2023-06-26</p>
            
 
    
@@ -1761,6 +1761,13 @@ will run OneMap and GUSMap, if higher than 2, it will run MAPpoly.</p>
 <p><strong>replaceADbyMissing</strong>: if true, it replace the allele
 depth (AD) field in input VCF file by missing (0,0) if the genotype (GT)
 is missing (./.)</p>
+<p><strong>run_supermassa</strong>: if true, run SuperMASSA genotype
+caller</p>
+<p><strong>run_polyrad</strong>: if true, run polyrad genotype
+caller</p>
+<p><strong>run_updog</strong>: if true, run updog genotype caller</p>
+<p><strong>run_gusmap</strong>: if true, run gusmap genotype caller and
+linkage map builder</p>
 </div>
 </div>
 </div>

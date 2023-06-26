@@ -230,3 +230,11 @@ This workflow uses:
 
 **replaceADbyMissing**: if true, it replace the allele depth (AD) field in input VCF file by missing (0,0) if the genotype (GT) is missing (./.)
 
+**run_supermassa**: if true, run SuperMASSA genotype caller
+
+**run_polyrad**: if true, run polyrad genotype caller
+
+**run_updog**: if true, run updog genotype caller
+
+**run_gusmap**: if true, run gusmap genotype caller and linkage map builder
+
