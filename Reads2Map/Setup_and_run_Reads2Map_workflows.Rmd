@@ -381,7 +381,10 @@ See [inputs description](https://cristianetaniguti.github.io/Tutorials/Reads2Map
                   "/home/chtaniguti/Reads2Map_tutorial/freebayes_vcf_norm_filt.recode.vcf.gz"],                             
     "Maps.vcfs_software": ["gatk", "gatk", "freebayes", "freebayes"],
     "Maps.filter_noninfo": true,
-    "Maps.replaceADbyMissing": "TRUE"
+    "Maps.replaceADbyMissing": true,
+    "Maps.global_errors": ["0.01","0.05"],
+    "Maps.genoprob_error": true,
+    "Maps.genoprob_global_errors":["0.01","0.05"]
 }
 ```
 

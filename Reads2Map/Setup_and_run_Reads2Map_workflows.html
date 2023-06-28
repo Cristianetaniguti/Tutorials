@@ -6,7 +6,7 @@
     <meta name="generator" content="pandoc" />
 
     
-        <meta name="date" content="2023-06-26" />
+        <meta name="date" content="2023-06-28" />
     
     <title>Setup and run Reads2Map workflows</title>
 
@@ -1532,7 +1532,7 @@ Prism.languages.r={comment:/#.*/,string:{pattern:/(['"])(?:\\.|(?!\1)[^\\\r\n])*
       <h1 class="title">Setup and run Reads2Map workflows</h1>
       
       <p class="authors">
-         <p class="date"><span class="glyphicon glyphicon-calendar"></span> 2023-06-26</p>
+         <p class="date"><span class="glyphicon glyphicon-calendar"></span> 2023-06-28</p>
            
 
    
@@ -1909,7 +1909,10 @@ description</a> and edit the options and paths (absolute paths) in
                   &quot;/home/chtaniguti/Reads2Map_tutorial/freebayes_vcf_norm_filt.recode.vcf.gz&quot;],                             
     &quot;Maps.vcfs_software&quot;: [&quot;gatk&quot;, &quot;gatk&quot;, &quot;freebayes&quot;, &quot;freebayes&quot;],
     &quot;Maps.filter_noninfo&quot;: true,
-    &quot;Maps.replaceADbyMissing&quot;: &quot;TRUE&quot;
+    &quot;Maps.replaceADbyMissing&quot;: true,
+    &quot;Maps.global_errors&quot;: [&quot;0.01&quot;,&quot;0.05&quot;],
+    &quot;Maps.genoprob_error&quot;: true,
+    &quot;Maps.genoprob_global_errors&quot;:[&quot;0.01&quot;,&quot;0.05&quot;]
 }</code></pre>
 <div id="if-running-locally-with-docker-1" class="section level4">
 <h4>If running locally with Docker</h4>
