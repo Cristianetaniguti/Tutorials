@@ -50,13 +50,13 @@ The `Pumbaa` tool was developed by one of Reads2Map authors (Lucas Taniguti) and
 
 ```{bash, eval=FALSE}
 # Download and install Pumbaa
-curl https://raw.githubusercontent.com/lmtani/pumbaa/main/install.sh | bash
+curl https://raw.githubusercontent.com/lmtani/pumbaa/main/assets/install.sh | bash
 
 # Download Cromwell and follow instructions to start Mysql and Cromwell server:
 pumbaa local-deploy
 ```
 
-The `local-deploy` command will give instructions on how to start a MySQL and Cromwell server. Leave the server running in a terminal and open another to submit the jobs as described in the section [`Run workflows`](#Run-workflows)
+The `local-deploy` command will give instructions on how to start a MySQL and Cromwell server. Leave the server running in a terminal and open another to submit the jobs as described in the section [`Run workflows`](#Run-Reads2Map-WDL-workflows)
 
 ## Setup to run in High performance computing (HPC) with `Caper`
 
