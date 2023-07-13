@@ -6,7 +6,7 @@
     <meta name="generator" content="pandoc" />
 
     
-        <meta name="date" content="2023-07-11" />
+        <meta name="date" content="2023-07-13" />
     
     <title>Setup and run Reads2Map workflows</title>
 
@@ -1524,7 +1524,7 @@ margin-left: 0 !important;
       <h1 class="title">Setup and run Reads2Map workflows</h1>
       
       <p class="authors">
-         <p class="date"><span class="glyphicon glyphicon-calendar"></span> 2023-07-11</p>
+         <p class="date"><span class="glyphicon glyphicon-calendar"></span> 2023-07-13</p>
            
 
    
@@ -1725,7 +1725,7 @@ description</a> and edit the options and paths (absolute paths) in
   &quot;SNPCalling.max_cores&quot;: 2,
   &quot;SNPCalling.pair_end&quot;: false,
   &quot;SNPCalling.enzyme&quot;: &quot;HindIII&quot;,
-  &quot;SNPCalling.max_ram&quot;: 2000,
+  &quot;SNPCalling.max_ram&quot;: 4000,
   &quot;SNPCalling.ploidy&quot;: 2,
   &quot;SNPCalling.rm_dupli&quot;: false,
   &quot;SNPCalling.run_gatk&quot;: true,
@@ -1752,7 +1752,40 @@ description</a> and edit the options and paths (absolute paths) in
 /home/chtaniguti/Reads2Map_tutorial/SRR6249788.sub.fastq   I_3_66  I_3_66.Lib1_D06_GCCAACT
 /home/chtaniguti/Reads2Map_tutorial/SRR6249795.sub.fastq   PT_F    PT_F.Lib1_E09_TGAACAT
 /home/chtaniguti/Reads2Map_tutorial/SRR6249808.sub.fastq   PT_M    PT_M.Lib2_E06_CGATGCG</code></pre>
-<p>See an sample file format example for <code>pair-end</code> reads <a href="https://github.com/Cristianetaniguti/Reads2Map/blob/develop/tests/data/polyploid/fastq/pair_end/samples_info.txt">here</a>.</p>
+<p>See an sample file format example for <code>pair-end</code> reads <a href="https://github.com/Cristianetaniguti/Reads2Map/blob/develop/tests/data/polyploid/fastq/pair_end/samples_info.txt">here</a>.
+This example file refer to roses dataset, to run it, use the <a href="https://github.com/Cristianetaniguti/Reads2Map/tree/develop/tests/data/polyploid/RchinensisV1.0">R.
+chinensis genome subset</a>. Below is an example of json input file for
+this dataset:</p>
+<pre><code>{
+  &quot;SNPCalling.chunk_size&quot;: 2,
+  &quot;SNPCalling.gatk_mchap&quot;: false,
+  &quot;SNPCalling.P1&quot;: &quot;P1&quot;,
+  &quot;SNPCalling.pop_map&quot;: null,
+  &quot;SNPCalling.rm_dupli&quot;: false,
+  &quot;SNPCalling.samples_info&quot;: &quot;tests/data/polyploid/fastq/pair_end/samples_info.txt&quot;,
+  &quot;SNPCalling.max_cores&quot;: 4,
+  &quot;SNPCalling.max_ram&quot;: 4000,
+  &quot;SNPCalling.pair_end&quot;: true,
+  &quot;SNPCalling.P2&quot;: &quot;P2&quot;,
+  &quot;SNPCalling.ploidy&quot;: 4,
+  &quot;SNPCalling.run_tassel&quot;: false,
+  &quot;SNPCalling.references&quot;: {
+    &quot;ref_fasta&quot;: &quot;tests/data/polyploid/RchinensisV1.0/Chr04_sub.fasta&quot;,
+    &quot;ref_dict&quot;: &quot;tests/data/polyploid/RchinensisV1.0/Chr04_sub.dict&quot;,
+    &quot;ref_ann&quot;: &quot;tests/data/polyploid/RchinensisV1.0/Chr04_sub.fasta.ann&quot;,
+    &quot;ref_sa&quot;: &quot;tests/data/polyploid/RchinensisV1.0/Chr04_sub.fasta.sa&quot;,
+    &quot;ref_amb&quot;: &quot;tests/data/polyploid/RchinensisV1.0/Chr04_sub.fasta.amb&quot;,
+    &quot;ref_pac&quot;: &quot;tests/data/polyploid/RchinensisV1.0/Chr04_sub.fasta.pac&quot;,
+    &quot;ref_bwt&quot;: &quot;tests/data/polyploid/RchinensisV1.0/Chr04_sub.fasta.bwt&quot;,
+    &quot;ref_fasta_index&quot;: &quot;tests/data/polyploid/RchinensisV1.0/Chr04_sub.fasta.fai&quot;
+  },
+  &quot;SNPCalling.hardfilters&quot;: true,
+  &quot;SNPCalling.run_stacks&quot;: true,
+  &quot;SNPCalling.run_freebayes&quot;: false,
+  &quot;SNPCalling.run_gatk&quot;: true,
+  &quot;SNPCalling.replaceAD&quot;: false,
+  &quot;SNPCalling.n_chrom&quot;: 1
+}</code></pre>
 </div>
 <div id="if-running-locally-with-docker" class="section level4">
 <h4>If running locally with Docker</h4>

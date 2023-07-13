@@ -134,7 +134,7 @@ docker run -v $(pwd):/data/ us.gcr.io/broad-gotc-prod/genomes-in-the-cloud:2.5.7
 
 **hardfilters**: "true" for performing Hard filtering in `GATK` results (see more about it [here](https://gatk.broadinstitute.org/hc/en-us/articles/360035890471-Hard-filtering-germline-short-variants))
 
-**gatk_mchap**: "true" for running `MCHap` in `GATK` results
+**gatk_mchap**: "true" for running `MCHap` in `GATK` results (warning: still under development)
 
 **run_freebayes**: "true" for running `freebayes`
 
