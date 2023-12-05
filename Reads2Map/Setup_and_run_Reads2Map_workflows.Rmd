@@ -1,12 +1,19 @@
 ---
 title: "Setup and run Reads2Map workflows"
 date: "`r Sys.Date()`"
+author: "[Reads2Map](https://doi.org/10.1093/gigascience/giad092)"
 output:
-  rmdformats::downcute:
-    self_contained: true
-    default_style: "light"
-    downcute_theme: "default"
+    rmdformats::readthedown:
+      css: readthedownstatgen.css
 ---
+
+```{r knitr_init, echo=FALSE, cache=FALSE, message=FALSE, cache.comments=FALSE, comment=FALSE}
+## Global options
+options(max.print="75")
+
+knitr::opts_knit$set(width=75)
+```
+
 
 # Overview
 
@@ -46,7 +53,7 @@ The easiest way of running the Reads2Map workflows is using the Terra.bio platfo
 
 What we like about `Pumbaa`: easy to install and use;  easy setup of server and Call cache; many options of visualization of the process.
 
-The `Pumbaa` tool was developed by one of Reads2Map authors (Lucas Taniguti) and provides a easy way to set up, run the workflows, visualize the submitted runs status, and search for results. It requires [`Docker`]().
+The `Pumbaa` tool was developed by one of Reads2Map authors (Lucas Taniguti) and provides a easy way to set up, run the workflows, visualize the submitted runs status, and search for results. It requires `Docker` and `Java`.
 
 ```{bash, eval=FALSE}
 # Download and install Pumbaa
@@ -56,11 +63,11 @@ curl https://raw.githubusercontent.com/lmtani/pumbaa/main/assets/install.sh | ba
 pumbaa local-deploy
 ```
 
-The `local-deploy` command will give instructions on how to start a MySQL and Cromwell server. Leave the server running in a terminal and open another to submit the jobs as described in the section [`Run workflows`](#Run-Reads2Map-WDL-workflows)
+The `local-deploy` command will give instructions on how to start a MySQL and Cromwell server. Leave the server running in a terminal and open another to submit the jobs as described in the section [`Run workflows`](#Run-Reads2Map-WDL-workflows).
 
 ## Setup to run in High performance computing (HPC) with `Caper`
 
-What we like about `Caper`: do not require MySQL to Call Cache; adaptability to different systems; provide easy way to edit backend in case of HPC specificity; easy to use
+What we like about `Caper`: do not require MySQL to Call Cache; adaptability to different systems; provide easy way to edit backend in case of HPC specificity; easy to use.
 
 Install `Caper` with pip:
 
@@ -83,7 +90,7 @@ As I said before, I don't have much space in my home directory, so I opened the 
 ```console
 local-loc-dir=/scratch/user/chtaniguti/caper
 
-slurm-leader-job-resource-param=-t 2:00:00 --mem 4G
+slurm-leader-job-resource-param=-t 2:00:00 --mem 4G --nodes 1
 ```
 
 To pull the singularity images, we will need to have internet access. My HPC requires a specific module to provide internet access to the nodes. Because of these particularity, I needed to modify the backend configurations of caper. They explain how to do it in [this section](https://github.com/ENCODE-DCC/caper/blob/master/DETAILS.md#how-to-override-capers-built-in-backend) of their documentation. Also, because of the space, I need to modify the default directories for singularity cache and images.
@@ -105,13 +112,17 @@ I simply added the `module load WebProxy` and the singularity files paths just b
 
 ```
 
+*warning*: if it happens that the workflows are not finding the input files and you already double checked the input files, change the order of the link types in the 'duplication-strategy' and 'localization' filed in the backend file configuration. Move the 'hard-link' to the top. The need for doing that will depend of the HPC system configuration.
+
 # Run Reads2Map WDL workflows
+
+## Single-end GBS diploid example
 
 We will use a subset of the Aspen diploid RADseq data (BioProject PRJNA395596) to exemplify the usage of the Reads2Map workflows.
 
-## Run SNPCalling
+### Run SNPCalling
 
-#### Download materials
+##### Download materials
 
 ```{bash, eval=FALSE}
 mkdir Reads2Map_tutorial
@@ -126,7 +137,7 @@ wget https://github.com/Cristianetaniguti/Reads2Map/raw/main/tests/data/Ptremula
 wget https://github.com/Cristianetaniguti/Reads2Map/raw/develop/tests/data/PtrichocarpaV3.0/Chr10.11.2M.fa
 ```
 
-We will also need the indexes for the reference genome:
+We will also need the indexes for the reference genome. We can use the `Docker` images:
 
 ```{bash, eval=FALSE}
 docker run -v $(pwd):/opt/ kfdrc/bwa-picard:latest-dev bwa index /opt/Chr10.11.2M.fa
@@ -157,34 +168,630 @@ See [inputs description](https://cristianetaniguti.github.io/Tutorials/Reads2Map
   "SNPCalling.ploidy": 2,
   "SNPCalling.rm_dupli": false,
   "SNPCalling.run_gatk": true,
-  "SNPCalling.run_freebayes": false,
+  "SNPCalling.run_freebayes": true,
   "SNPCalling.run_tassel": true,
-  "SNPCalling.run_stacks": false,
+  "SNPCalling.run_stacks": true,
   "SNPCalling.hardfilters": true,
   "SNPCalling.n_chrom": 1,
   "SNPCalling.chunk_size": 1,
-  "SNPCalling.samples_info": "/home/chtaniguti/Reads2Map_tutorial/samples_info_pop_sub.tsv",
+  "SNPCalling.samples_info": "/home/rose_lab/Reads2Map_tutorial/samples_info_pop_sub.tsv",
   "SNPCalling.references": {
-    "ref_fasta": "/home/chtaniguti/Reads2Map_tutorial/Chr10.11.2M.fa",
-    "ref_dict": "/home/chtaniguti/Reads2Map_tutorial/Chr10.11.2M.dict",
-    "ref_ann": "/home/chtaniguti/Reads2Map_tutorial/Chr10.11.2M.fa.ann",
-    "ref_sa": "/home/chtaniguti/Reads2Map_tutorial/Chr10.11.2M.fa.sa",
-    "ref_amb": "/home/chtaniguti/Reads2Map_tutorial/Chr10.11.2M.fa.amb",
-    "ref_pac": "/home/chtaniguti/Reads2Map_tutorial/Chr10.11.2M.fa.pac",
-    "ref_bwt": "/home/chtaniguti/Reads2Map_tutorial/Chr10.11.2M.fa.bwt",
-    "ref_fasta_index": "/home/chtaniguti/Reads2Map_tutorial/Chr10.11.2M.fa.fai"
+    "ref_fasta": "/home/rose_lab/Reads2Map_tutorial/Chr10.11.2M.fa",
+    "ref_dict": "/home/rose_lab/Reads2Map_tutorial/Chr10.11.2M.dict",
+    "ref_ann": "/home/rose_lab/Reads2Map_tutorial/Chr10.11.2M.fa.ann",
+    "ref_sa": "/home/rose_lab/Reads2Map_tutorial/Chr10.11.2M.fa.sa",
+    "ref_amb": "/home/rose_lab/Reads2Map_tutorial/Chr10.11.2M.fa.amb",
+    "ref_pac": "/home/rose_lab/Reads2Map_tutorial/Chr10.11.2M.fa.pac",
+    "ref_bwt": "/home/rose_lab/Reads2Map_tutorial/Chr10.11.2M.fa.bwt",
+    "ref_fasta_index": "/home/rose_lab/Reads2Map_tutorial/Chr10.11.2M.fa.fai"
   }
 }
 ```
 
-Also edit the path in `samples_info_pop_sub.tsv`:
+*warning*: WDL workflows will break if the .wdl and .json files have TAB characters. Some text editors will include TABs automatically. If it happens, the error will be something similar to: "(Do not use \\t(TAB) for indentation)". To solve it, just remove the TABs (\\t) from the file.
+
+Also adapt the paths in `samples_info_pop_sub.tsv` to your computer paths:
 
 ```
-/home/chtaniguti/Reads2Map_tutorial/SRR6249787.sub.fastq   I_3_55  I_3_55.Lib1_C09_AGAAGTC
-/home/chtaniguti/Reads2Map_tutorial/SRR6249788.sub.fastq   I_3_66  I_3_66.Lib1_D06_GCCAACT
-/home/chtaniguti/Reads2Map_tutorial/SRR6249795.sub.fastq   PT_F    PT_F.Lib1_E09_TGAACAT
-/home/chtaniguti/Reads2Map_tutorial/SRR6249808.sub.fastq   PT_M    PT_M.Lib2_E06_CGATGCG
+/home/rose_lab/Reads2Map_tutorial/SRR6249787.sub.fastq   I_3_55  I_3_55.Lib1_C09_AGAAGTC
+/home/rose_lab/Reads2Map_tutorial/SRR6249788.sub.fastq   I_3_66  I_3_66.Lib1_D06_GCCAACT
+/home/rose_lab/Reads2Map_tutorial/SRR6249795.sub.fastq   PT_F    PT_F.Lib1_E09_TGAACAT
+/home/rose_lab/Reads2Map_tutorial/SRR6249808.sub.fastq   PT_M    PT_M.Lib2_E06_CGATGCG
 ```
+
+##### Running locally with Docker
+
+If you still didn't, open cromwell server with:
+
+```{bash, eval=FALSE}
+pumbaa local-deploy
+```
+
+Follow the instructions. The final one should be like:
+
+```{bash, eval=FALSE}
+cd /home/rose_lab/.cromwell && java -DLOG_MODE=pretty -Dconfig.file=/home/rose_lab/.cromwell/cromwell.conf -jar /home/rose_lab/.cromwell/cromwell.jar server
+```
+
+You can adapt `cromwell.conf` according to your needs before running the server. Once you did, leave it running and run the command in another terminal:
+
+```{bash, eval=FALSE}
+pumbaa submit -w EmpiricalSNPCalling_develop.wdl -i EmpiricalSNPCalling_develop.inputs.json -d EmpiricalSNPCalling_develop.zip
+```
+
+```console
+2023/05/25 17:43:05 POST request to: http://127.0.0.1:8000/api/workflows/v1
+🐖 Operation= 8a9f091e-53ba-4fe0-bc4a-e68b03751050 , Status=Submitted
+```
+
+You can check the job log in the terminal that the server is on. Or also check the job status with:
+
+```{bash, eval=FALSE}
+pumbaa q
+```
+
+```console
+2023/05/25 17:43:48 GET request to: http://127.0.0.1:8000/api/workflows/v1/query?submission=2023-05-18T17%3A43%3A48.269Z
++--------------------------------------+-----------------------------+-------------------+----------+-----------+
+|              OPERATION               |            NAME             |       START       | DURATION |  STATUS   |
++--------------------------------------+-----------------------------+-------------------+----------+-----------+
+| 274026f5-b8e6-4583-9830-b6b6c0c893ea | SNPCalling                  | 2023-05-25 22h43m | 37s      | Running   |
+```
+
+More details:
+
+```{bash, eval=FALSE}
+pumbaa metadata -o 274026f5-b8e6-4583-9830-b6b6c0c893ea
+```
+
+```console
+2023/12/04 14:24:40 GET request to: http://127.0.0.1:8000/api/workflows/v1/274026f5-b8e6-4583-9830-b6b6c0c893ea/metadata?excludeKey=executionEvents&excludeKey=jes&excludeKey=inputs
++-----------------------------+---------+------------+--------+
+|            TASK             | ATTEMPT |  ELAPSED   | STATUS |
++-----------------------------+---------+------------+--------+
+| CreateAlignmentFromFamilies | 1       | 3m21.24s   | Done   |
+| FreebayesGenotyping         | 1       | 9m3.247s   | Done   |
+| GatkGenotyping              | 1       | 11m13.252s | Done   |
+| StacksGenotyping            | 1       | 8m28.255s  | Done   |
+| TasselGenotyping            | 1       | 13m19.194s | Done   |
++-----------------------------+---------+------------+--------+
+```
+
+Check the output paths:
+
+```{bash, eval=FALSE}
+pumbaa outputs -o 274026f5-b8e6-4583-9830-b6b6c0c893ea
+```
+
+```console
+2023/12/04 14:22:50 GET request to: http://127.0.0.1:8000/api/workflows/v1/274026f5-b8e6-4583-9830-b6b6c0c893ea/outputs
+{
+   "SNPCalling.Plots": "/home/rose_lab/.cromwell/cromwell-executions/SNPCalling/274026f5-b8e6-4583-9830-b6b6c0c893ea/call-GatkGenotyping/GatkGenotyping/1574ec57-43af-43a3-b5ca-2bcf85880fa8/call-HardFilteringEmp/HardFilteringEmp/3297aa11-6a28-473a-b140-44124afc6527/call-QualPlots/cacheCopy/execution/QualPlots.tar.gz",
+   "SNPCalling.freebayes_vcfEval": "/home/rose_lab/.cromwell/cromwell-executions/SNPCalling/274026f5-b8e6-4583-9830-b6b6c0c893ea/call-FreebayesGenotyping/FreebayesGenotyping/50a29fa0-2bf4-4005-8595-8e1555096b9b/call-Normalization/Normalization/0f229dc2-53d6-4404-a613-849fb97b2ebe/call-VariantEval/cacheCopy/execution/vcfEval.txt",
+   "SNPCalling.gatk_multi_vcf": null,
+   "SNPCalling.gatk_vcfEval": "/home/rose_lab/.cromwell/cromwell-executions/SNPCalling/274026f5-b8e6-4583-9830-b6b6c0c893ea/call-GatkGenotyping/GatkGenotyping/1574ec57-43af-43a3-b5ca-2bcf85880fa8/call-Normalization/Normalization/db0c3e35-dfec-4355-b17a-8bca10eaa608/call-VariantEval/cacheCopy/execution/vcfEval.txt",
+   "SNPCalling.merged_bam": "/home/rose_lab/.cromwell/cromwell-executions/SNPCalling/274026f5-b8e6-4583-9830-b6b6c0c893ea/call-CreateAlignmentFromFamilies/CreateAlignmentFromFamilies/ab71610d-663c-43c5-82ff-69b28931447a/call-MergeBams/cacheCopy/execution/merged.bam",
+   "SNPCalling.stacks_multiallelics": "/home/rose_lab/.cromwell/cromwell-executions/SNPCalling/274026f5-b8e6-4583-9830-b6b6c0c893ea/call-StacksGenotyping/StacksGenotyping/c887d811-e24e-4261-b0ce-e122ae435a09/call-RefMap/cacheCopy/execution/stacks/populations.haps.vcf",
+   "SNPCalling.vcfs": [
+      "/home/rose_lab/.cromwell/cromwell-executions/SNPCalling/274026f5-b8e6-4583-9830-b6b6c0c893ea/call-GatkGenotyping/GatkGenotyping/1574ec57-43af-43a3-b5ca-2bcf85880fa8/call-Normalization/Normalization/db0c3e35-dfec-4355-b17a-8bca10eaa608/call-BiallelicNormalization/cacheCopy/execution/vcf_norm.vcf.gz",
+      "/home/rose_lab/.cromwell/cromwell-executions/SNPCalling/274026f5-b8e6-4583-9830-b6b6c0c893ea/call-FreebayesGenotyping/FreebayesGenotyping/50a29fa0-2bf4-4005-8595-8e1555096b9b/call-Normalization/Normalization/0f229dc2-53d6-4404-a613-849fb97b2ebe/call-BiallelicNormalization/cacheCopy/execution/vcf_norm.vcf.gz",
+      "/home/rose_lab/.cromwell/cromwell-executions/SNPCalling/274026f5-b8e6-4583-9830-b6b6c0c893ea/call-TasselGenotyping/TasselGenotyping/66c5fe15-0ba4-4b8d-ac5a-ba3463f383f9/call-Normalization/Normalization/51c857ce-16a1-44d0-80ed-19df5e6ffcb6/call-BiallelicNormalization/cacheCopy/execution/vcf_norm.vcf.gz",
+      "/home/rose_lab/.cromwell/cromwell-executions/SNPCalling/274026f5-b8e6-4583-9830-b6b6c0c893ea/call-StacksGenotyping/StacksGenotyping/c887d811-e24e-4261-b0ce-e122ae435a09/call-Normalization/Normalization/a4e0bea3-ffd4-43fe-ba8a-24957023dade/call-BiallelicNormalization/cacheCopy/execution/vcf_norm.vcf.gz"
+   ],
+   "SNPCalling.vcfs_counts_source": [
+      "vcf",
+      "vcf",
+      "vcf",
+      "vcf"
+   ],
+   "SNPCalling.vcfs_software": [
+      "gatk",
+      "freebayes",
+      "tassel",
+      "stacks"
+   ]
+}
+
+```
+
+Or interactively navigate through the tasks:
+
+```{bash, eval=FALSE}
+pumbaa navigate -o 274026f5-b8e6-4583-9830-b6b6c0c893ea
+```
+
+```console
+2023/05/25 18:32:40 GET request to: http://127.0.0.1:8000/api/workflows/v1/392e2620-5174-4a0d-8ce3-15d71ce52bf4/metadata?excludeKey=executionEvents&excludeKey=submittedFiles&excludeKey=jes&excludeKey=inputs
+Workflow: SNPCalling
+
+Use the arrow keys to navigate: ↓ ↑ → ←
+? Select a task:
+  ▸ GatkGenotyping
+    CreateAlignmentFromFamilies
+    TasselGenotyping
+```
+
+##### Running HPC system with SLURM + singularity
+
+Load required libraries and add caper to PATH (if you still didn´t):
+
+```{bash, eval=FALSE}
+module load GCCcore/12.2.0 Python/3.10.8  # Libraries required for using pip in my specific HPC (search the ones in yours)
+module load Java/17.0.2 # Java will also be required to run Caper
+export PATH=$PATH:/scratch/user/chtaniguti/caper/bin/ # You can add this line to the .bashrc file usually located in the home directory to avoid the need of running it every time you connect
+```
+
+Run workflow:
+
+```{bash, eval=FALSE}
+caper hpc submit EmpiricalSNPCalling_develop.wdl -i EmpiricalSNPCalling_develop.inputs.json --singularity -p EmpiricalSNPCalling_develop.zip --leader-job-name SNPCalling --backend-file backend.conf
+```
+
+File `backend.conf` being the one that we edit in [Setup to run in High performance computing (HPC) with `Caper`](#Setup-to-run-in-High-performance-computing-(HPC)-with-Caper)
+
+Check run status:
+
+```{bash, eval=FALSE}
+squeue -u chtaniguti # replace by your user name
+
+# or
+
+caper hpc list
+```
+
+If required to abort the job, use `caper hpc abort <JOBID>`
+
+You can check the workflow log by opening the file named slurm-<JOBID>. The location of the outputs will be printed at the end of the log file. 
+
+```{bash, eval=FALSE}
+tail -f cromwell.out # Exit with Ctrl-C
+
+tail -n 100 cromwell.out
+```
+
+```console
+2023-05-30 14:44:57,128 cromwell-system-akka.dispatchers.engine-dispatcher-31 INFO  - SingleWorkflowRunnerActor workflow finished with status 'Succeeded'.
+{
+  "outputs": {
+    "SNPCalling.vcfs_software": ["gatk"],
+    "SNPCalling.gatk_multi_vcf": null,
+    "SNPCalling.vcfs_counts_source": ["vcf"],
+    "SNPCalling.Plots": "/scratch/user/chtaniguti/Reads2Map/SNPCalling/34cf00db-9ba8-4eb2-97fd-975eb58a686a/call-GatkGenotyping/GatkGenotyping/6e6e1a4a-b917-402f-ad47-6474be5331df/call-HardFilteringEmp/HardFilteringEmp/ceda7b1d-f608-4777-b332-476a8146894c/call-QualPlots/execution/QualPlots.tar.gz",
+    "SNPCalling.merged_bam": "/scratch/user/chtaniguti/Reads2Map/SNPCalling/34cf00db-9ba8-4eb2-97fd-975eb58a686a/call-CreateAlignmentFromFamilies/CreateAlignmentFromFamilies/3906d99d-8d72-47f1-82ba-b29709ae7058/call-MergeBams/execution/merged.bam",
+    "SNPCalling.freebayes_vcfEval": null,
+    "SNPCalling.stacks_multiallelics": null,
+    "SNPCalling.gatk_vcfEval": "/scratch/user/chtaniguti/Reads2Map/SNPCalling/34cf00db-9ba8-4eb2-97fd-975eb58a686a/call-GatkGenotyping/GatkGenotyping/6e6e1a4a-b917-402f-ad47-6474be5331df/call-Normalization/Normalization/be76cd00-c036-4704-87d9-b6533466d21a/call-VariantEval/execution/vcfEval.txt",
+    "SNPCalling.vcfs": ["/scratch/user/chtaniguti/Reads2Map/SNPCalling/34cf00db-9ba8-4eb2-97fd-975eb58a686a/call-GatkGenotyping/GatkGenotyping/6e6e1a4a-b917-402f-ad47-6474be5331df/call-Normalization/Normalization/be76cd00-c036-4704-87d9-b6533466d21a/call-BiallelicNormalization/execution/vcf_norm.vcf.gz"]
+  },
+  "id": "34cf00db-9ba8-4eb2-97fd-975eb58a686a"
+}
+```
+
+### Run Maps
+
+We suggest you to check the output VCF files before proceed to build the maps. You may want to apply specific filters according to your data set. Because we are using just a subset of samples (4) for this example, we cannot use the your output VCFs as input in the `Maps`. 
+
+### Download materials
+
+For the examplify `Maps` usage, we made available another subset for which we kept 124 individuals and a reduced the number of markers (~ 130). Download the example VCFs:
+
+```{bash, eval=FALSE}
+wget https://github.com/Cristianetaniguti/Reads2Map/raw/main/tests/data/Ptremula_PRJNA395596_subset/snpcalling_vcfs/gatk_fullpop/gatk_bam_norm_filt.recode.vcf.gz
+wget https://github.com/Cristianetaniguti/Reads2Map/raw/main/tests/data/Ptremula_PRJNA395596_subset/snpcalling_vcfs/gatk_fullpop/gatk_vcf_norm_filt.recode.vcf.gz
+wget https://github.com/Cristianetaniguti/Reads2Map/raw/main/tests/data/Ptremula_PRJNA395596_subset/snpcalling_vcfs/freebayes_fullpop/freebayes_bam_norm_filt.recode.vcf.gz
+wget https://github.com/Cristianetaniguti/Reads2Map/raw/main/tests/data/Ptremula_PRJNA395596_subset/snpcalling_vcfs/freebayes_fullpop/freebayes_vcf_norm_filt.recode.vcf.gz
+```
+
+Select the workflow version in the [releases page](https://github.com/Cristianetaniguti/Reads2Map/releases) and download it:
+
+```{bash, eval=FALSE}
+wget https://github.com/Cristianetaniguti/Reads2Map/releases/download/EmpiricalMaps_develop/EmpiricalMaps_develop.wdl
+wget https://github.com/Cristianetaniguti/Reads2Map/releases/download/EmpiricalMaps_develop/EmpiricalMaps_develop.zip
+wget https://github.com/Cristianetaniguti/Reads2Map/releases/download/EmpiricalMaps_develop/EmpiricalMaps_develop.inputs.json
+```
+
+See [inputs description](https://cristianetaniguti.github.io/Tutorials/Reads2Map/EmpiricalReads.html) and edit the options and paths (absolute paths) in `EmpiricalMaps_develop.inputs.json`:
+
+```
+{
+    "Maps.dataset": {
+      "parent2": "PT_M",
+      "name": "populus_sub",
+      "parent1": "PT_F",
+      "chromosome": "Chr10",
+      "cross": "F1",
+      "multiallelics": true
+    },
+    "Maps.max_cores": 2,
+    "Maps.run_supermassa": "true",
+    "Maps.run_gusmap": "false",
+    "Maps.run_polyrad": "false",
+    "Maps.run_updog": "true",
+    "Maps.ploidy": 2,
+    "Maps.gatk_mchap": "FALSE",
+    "Maps.vcfs_counts_source": ["vcf","bam","vcf","bam"],
+    "Maps.vcfs": ["/home/rose_lab/Reads2Map_tutorial/gatk_bam_norm_filt.recode.vcf.gz",       
+                  "/home/rose_lab/Reads2Map_tutorial/gatk_vcf_norm_filt.recode.vcf.gz",          
+                  "/home/rose_lab/Reads2Map_tutorial/freebayes_bam_norm_filt.recode.vcf.gz",   
+                  "/home/rose_lab/Reads2Map_tutorial/freebayes_vcf_norm_filt.recode.vcf.gz"],                             
+    "Maps.vcfs_software": ["gatk", "gatk", "freebayes", "freebayes"],
+    "Maps.filter_noninfo": true,
+    "Maps.replaceADbyMissing": true,
+    "Maps.global_errors": ["0.01","0.05"],
+    "Maps.genoprob_error": true,
+    "Maps.genoprob_global_errors":["0.01","0.05"]
+}
+```
+
+##### Running locally with Docker
+
+```{bash, eval=FALSE}
+pumbaa submit -w EmpiricalMaps_develop.wdl -i EmpiricalMaps_develop.inputs.json -d EmpiricalMaps_develop.zip
+```
+
+Once it finishes:
+
+```{bash, eval=FALSE}
+pumbaa q
+```
+
+```console
+2023/05/30 15:42:08 GET request to: http://127.0.0.1:8000/api/workflows/v1/query?submission=2023-05-23T15%3A42%3A08.771Z
++--------------------------------------+------+-------------------+----------+-----------+
+|              OPERATION               | NAME |       START       | DURATION |  STATUS   |
++--------------------------------------+------+-------------------+----------+-----------+
+| 8e27954a-f477-4db0-a2c9-70f86314914e | Maps | 2023-05-30 20h21m | 19m57s   | Succeeded |
++--------------------------------------+------+-------------------+----------+-----------+
+```
+
+```{bash, eval=FALSE}
+pumbaa outputs -o 8e27954a-f477-4db0-a2c9-70f86314914e
+```
+
+```{bash, eval=FALSE}
+2023/05/30 15:42:55 GET request to: http://127.0.0.1:8000/api/workflows/v1/8e27954a-f477-4db0-a2c9-70f86314914e/outputs
+{
+   "Maps.EmpiricalReads_results": "/home/rose_lab/Reads2Map_tutorial/cromwell-executions/Maps/8e27954a-f477-4db0-a2c9-70f86314914e/call-JointAllReports/execution/EmpiricalReads_results.tar.gz"
+}
+```
+
+The section `Visualize results` will show how to visualize diagnostic graphics from the `EmpiricalReads_results.tar.gz` file.
+
+##### Running in HPC system with SLURM + singularity
+
+[Load required libraries, add caper to PATH (if you still didn´t)](#Setup-to-run-in-High-performance-computing-(HPC)-with-Caper), and run the workflow.
+
+```{bash, eval=FALSE}
+caper hpc submit EmpiricalMaps_develop.wdl -i EmpiricalMaps_develop.inputs.json --singularity -p EmpiricalMaps_develop.zip --leader-job-name Maps --backend-file backend.conf
+```
+
+## Single-end GBS polyploid example data
+
+We will use a subset of the Rose GBS data (provided by Oscar Riera-Lizarazu and Tessa Hochhaus, thanks!!) to exemplify the usage of the Reads2Map workflows.
+
+### Run SNPCalling
+
+##### Download materials
+
+```{bash, eval=FALSE}
+mkdir Reads2Map_tutorial_poly
+cd Reads2Map_tutorial_poly
+
+wget https://github.com/Cristianetaniguti/Reads2Map/raw/develop/tests/data/polyploid/fastq/single_end/1.fastq.gz
+wget https://github.com/Cristianetaniguti/Reads2Map/raw/develop/tests/data/polyploid/fastq/single_end/98.fastq.gz
+wget https://github.com/Cristianetaniguti/Reads2Map/raw/develop/tests/data/polyploid/fastq/single_end/P1.fastq.gz
+wget https://github.com/Cristianetaniguti/Reads2Map/raw/develop/tests/data/polyploid/fastq/single_end/P2.fastq.gz
+wget https://github.com/Cristianetaniguti/Reads2Map/raw/develop/tests/data/polyploid/fastq/single_end/samples_info.txt
+
+wget https://github.com/Cristianetaniguti/Reads2Map/raw/develop/tests/data/polyploid/RchinensisV1.0/Chr04_sub.fasta
+```
+
+We will also need the indexes for the reference genome. We can use the `Docker` images:
+
+```{bash, eval=FALSE}
+docker run -v $(pwd):/opt/ kfdrc/bwa-picard:latest-dev bwa index /opt/Chr04_sub.fasta
+
+docker run -v $(pwd):/opt/ kfdrc/bwa-picard:latest-dev  java -jar /picard.jar CreateSequenceDictionary \
+    R=/opt/Chr04_sub.fasta \
+    O=/opt/Chr04_sub.dict
+    
+docker run -v $(pwd):/opt/ cristaniguti/r-samtools:latest samtools faidx /opt/Chr04_sub.fasta
+```
+
+Select the workflow version in the [releases page](https://github.com/Cristianetaniguti/Reads2Map/releases) and download it:
+
+```{bash, eval=FALSE}
+wget https://github.com/Cristianetaniguti/Reads2Map/releases/download/EmpiricalSNPCalling_develop/EmpiricalSNPCalling_develop.wdl
+wget https://github.com/Cristianetaniguti/Reads2Map/releases/download/EmpiricalSNPCalling_develop/EmpiricalSNPCalling_develop.zip
+wget https://github.com/Cristianetaniguti/Reads2Map/releases/download/EmpiricalSNPCalling_develop/EmpiricalSNPCalling_develop.inputs.json
+```
+
+See [inputs description](https://cristianetaniguti.github.io/Tutorials/Reads2Map/EmpiricalReads.html) and edit the options and paths (absolute paths) in `EmpiricalSNPCalling_develop.inputs.json`:
+
+```
+{
+  "SNPCalling.max_cores": 2,
+  "SNPCalling.max_ram": 2000,  
+  "SNPCalling.ploidy": 4,
+  "SNPCalling.enzyme": "NgoMIV",
+  "SNPCalling.rm_dupli": false,
+  "SNPCalling.replaceAD": false,
+  "SNPCalling.run_tassel": true,
+  "SNPCalling.run_stacks": true,
+  "SNPCalling.run_gatk": true,
+  "SNPCalling.run_freebayes": true,
+  "SNPCalling.hardfilters": true,
+  "SNPCalling.n_chrom": 1,
+  "SNPCalling.chunk_size": 1,
+  "SNPCalling.samples_info": "/home/rose_lab/Reads2Map_tutorial_poly/samples_info.txt",
+  "SNPCalling.gatk_mchap": false,
+  "SNPCalling.references": {
+    "ref_fasta": "/home/rose_lab/Reads2Map_tutorial_poly/Chr04_sub.fasta",
+    "ref_dict": "/home/rose_lab/Reads2Map_tutorial_poly/Chr04_sub.dict",
+    "ref_ann": "/home/rose_lab/Reads2Map_tutorial_poly/Chr04_sub.fasta.ann",
+    "ref_sa": "/home/rose_lab/Reads2Map_tutorial_poly/Chr04_sub.fasta.sa",
+    "ref_amb": "/home/rose_lab/Reads2Map_tutorial_poly/Chr04_sub.fasta.amb",
+    "ref_pac": "/home/rose_lab/Reads2Map_tutorial_poly/Chr04_sub.fasta.pac",
+    "ref_bwt": "/home/rose_lab/Reads2Map_tutorial_poly/Chr04_sub.fasta.bwt",
+    "ref_fasta_index": "/home/rose_lab/Reads2Map_tutorial_poly/Chr04_sub.fasta.fai"
+  }
+}
+```
+
+*warning*: WDL workflows will break if the .wdl and .json files have TAB characters. Some text editors will include TABs automatically. If it happens, the error will be something similar to: "(Do not use \\t(TAB) for indentation)". To solve it, just remove the TABs (\\t) from the file.
+
+Also adapt the paths in `samples_info.txt` to your computer paths:
+
+```
+/home/rose_lab/Reads2Map_tutorial_poly/1.fastq.gz   1   1
+/home/rose_lab/Reads2Map_tutorial_poly/98.fastq.gz   98    98
+/home/rose_lab/Reads2Map_tutorial_poly/P1.fastq.gz   P1    P1
+/home/rose_lab/Reads2Map_tutorial_poly/P2.fastq.gz   P2    P2
+```
+
+##### Running locally with Docker
+
+If you still didn't, open cromwell server with:
+
+```{bash, eval=FALSE}
+pumbaa local-deploy
+```
+
+Follow the instructions. The final one should be like:
+
+```{bash, eval=FALSE}
+cd /home/rose_lab/.cromwell && java -DLOG_MODE=pretty -Dconfig.file=/home/rose_lab/.cromwell/cromwell.conf -jar /home/rose_lab/.cromwell/cromwell.jar server
+```
+
+You can adapt `cromwell.conf` according to your needs before running the server. Once you did, leave it running and run the command in another terminal:
+
+```{bash, eval=FALSE}
+pumbaa submit -w EmpiricalSNPCalling_develop.wdl -i EmpiricalSNPCalling_develop.inputs.json -d EmpiricalSNPCalling_develop.zip
+```
+
+```console
+2023/05/25 17:43:05 POST request to: http://127.0.0.1:8000/api/workflows/v1
+🐖 Operation= 38d88345-01f9-4f69-9ecd-93e23f38d683 , Status=Submitted
+```
+
+You can check the job log in the terminal that the server is on. Or also check the job status with:
+
+```{bash, eval=FALSE}
+pumbaa q
+```
+
+```console
+2023/05/25 17:43:48 GET request to: http://127.0.0.1:8000/api/workflows/v1/query?submission=2023-05-18T17%3A43%3A48.269Z
++--------------------------------------+-----------------------------+-------------------+----------+-----------+
+|              OPERATION               |            NAME             |       START       | DURATION |  STATUS   |
++--------------------------------------+-----------------------------+-------------------+----------+-----------+
+| 38d88345-01f9-4f69-9ecd-93e23f38d683 | SNPCalling                  | 2023-05-25 22h43m | 37s      | Running   |
+```
+
+More details:
+
+```{bash, eval=FALSE}
+pumbaa metadata -o 38d88345-01f9-4f69-9ecd-93e23f38d683
+```
+
+```console
+2023/12/04 21:15:04 GET request to: http://127.0.0.1:8000/api/workflows/v1/38d88345-01f9-4f69-9ecd-93e23f38d683/metadata?excludeKey=executionEvents&excludeKey=jes&excludeKey=inputs
++-----------------------------+---------+-----------+--------+
+|            TASK             | ATTEMPT |  ELAPSED  | STATUS |
++-----------------------------+---------+-----------+--------+
+| CreateAlignmentFromFamilies | 1       | 2m54.153s | Done   |
+| FreebayesGenotyping         | 1       | 5m33.757s | Done   |
+| GatkGenotyping              | 1       | 7m3.729s  | Done   |
+| StacksGenotyping            | 1       | 5m8.73s   | Done   |
+| TasselGenotyping            | 1       | 8m32.118s | Done   |
++-----------------------------+---------+-----------+--------+
+```
+
+Check the output paths:
+
+```{bash, eval=FALSE}
+pumbaa outputs -o 38d88345-01f9-4f69-9ecd-93e23f38d683
+```
+
+```console
+2023/12/04 21:15:30 GET request to: http://127.0.0.1:8000/api/workflows/v1/38d88345-01f9-4f69-9ecd-93e23f38d683/outputs
+{
+   "SNPCalling.Plots": "/home/rose_lab/.cromwell/cromwell-executions/SNPCalling/38d88345-01f9-4f69-9ecd-93e23f38d683/call-GatkGenotyping/GatkGenotyping/fbde2bc4-9fa4-44a5-a9b8-38fec4c247d6/call-HardFilteringEmp/HardFilteringEmp/113b3cad-b95c-4fb3-bf0f-653a60b3dbb8/call-QualPlots/execution/QualPlots.tar.gz",
+   "SNPCalling.freebayes_vcfEval": "/home/rose_lab/.cromwell/cromwell-executions/SNPCalling/38d88345-01f9-4f69-9ecd-93e23f38d683/call-FreebayesGenotyping/FreebayesGenotyping/902b3700-ec8d-465f-8564-a2c3d4a9ce95/call-Normalization/Normalization/cdccf07f-6668-4cd9-9aaa-6481cefa7241/call-VariantEval/execution/vcfEval.txt",
+   "SNPCalling.gatk_multi_vcf": null,
+   "SNPCalling.gatk_vcfEval": "/home/rose_lab/.cromwell/cromwell-executions/SNPCalling/38d88345-01f9-4f69-9ecd-93e23f38d683/call-GatkGenotyping/GatkGenotyping/fbde2bc4-9fa4-44a5-a9b8-38fec4c247d6/call-Normalization/Normalization/804b913b-233f-48c0-86c4-3f823215bee2/call-VariantEval/execution/vcfEval.txt",
+   "SNPCalling.merged_bam": "/home/rose_lab/.cromwell/cromwell-executions/SNPCalling/38d88345-01f9-4f69-9ecd-93e23f38d683/call-CreateAlignmentFromFamilies/CreateAlignmentFromFamilies/76fe1b16-8bf7-4f99-a3b1-2fe3b7628cac/call-MergeBams/execution/merged.bam",
+   "SNPCalling.stacks_multiallelics": "/home/rose_lab/.cromwell/cromwell-executions/SNPCalling/38d88345-01f9-4f69-9ecd-93e23f38d683/call-StacksGenotyping/StacksGenotyping/e8c3e4d1-20d7-4e04-8418-62fa5e79d45d/call-RefMap/execution/stacks/populations.haps.vcf",
+   "SNPCalling.vcfs": [
+      "/home/rose_lab/.cromwell/cromwell-executions/SNPCalling/38d88345-01f9-4f69-9ecd-93e23f38d683/call-GatkGenotyping/GatkGenotyping/fbde2bc4-9fa4-44a5-a9b8-38fec4c247d6/call-Normalization/Normalization/804b913b-233f-48c0-86c4-3f823215bee2/call-BiallelicNormalization/execution/vcf_norm.vcf.gz",
+      "/home/rose_lab/.cromwell/cromwell-executions/SNPCalling/38d88345-01f9-4f69-9ecd-93e23f38d683/call-FreebayesGenotyping/FreebayesGenotyping/902b3700-ec8d-465f-8564-a2c3d4a9ce95/call-Normalization/Normalization/cdccf07f-6668-4cd9-9aaa-6481cefa7241/call-BiallelicNormalization/execution/vcf_norm.vcf.gz",
+      "/home/rose_lab/.cromwell/cromwell-executions/SNPCalling/38d88345-01f9-4f69-9ecd-93e23f38d683/call-TasselGenotyping/TasselGenotyping/d5476d60-9e1b-4748-a098-d211127245bd/call-Normalization/Normalization/84fbe915-39be-48a2-8f6c-187cd433a504/call-BiallelicNormalization/cacheCopy/execution/vcf_norm.vcf.gz",
+      "/home/rose_lab/.cromwell/cromwell-executions/SNPCalling/38d88345-01f9-4f69-9ecd-93e23f38d683/call-StacksGenotyping/StacksGenotyping/e8c3e4d1-20d7-4e04-8418-62fa5e79d45d/call-Normalization/Normalization/acf58b6c-5fd1-49fc-aa17-2565a5ba744f/call-BiallelicNormalization/execution/vcf_norm.vcf.gz"
+   ],
+   "SNPCalling.vcfs_counts_source": [
+      "vcf",
+      "vcf",
+      "vcf",
+      "vcf"
+   ],
+   "SNPCalling.vcfs_software": [
+      "gatk",
+      "freebayes",
+      "tassel",
+      "stacks"
+   ]
+}
+```
+
+Or interactively navigate through the tasks:
+
+```{bash, eval=FALSE}
+pumbaa navigate -o 38d88345-01f9-4f69-9ecd-93e23f38d683
+```
+
+```console
+2023/12/04 21:15:54 GET request to: http://127.0.0.1:8000/api/workflows/v1/38d88345-01f9-4f69-9ecd-93e23f38d683/metadata?excludeKey=executionEvents&excludeKey=submittedFiles&excludeKey=jes&excludeKey=inputs
+Workflow: SNPCalling
+
+Use the arrow keys to navigate: ↓ ↑ → ←
+? Select a task:
+  ▸ FreebayesGenotyping
+    StacksGenotyping
+    GatkGenotyping
+    CreateAlignmentFromFamilies
+    TasselGenotyping
+```
+
+##### Running HPC system with SLURM + singularity
+
+Load required libraries and add caper to PATH (if you still didn´t):
+
+```{bash, eval=FALSE}
+module load GCCcore/12.2.0 Python/3.10.8  # Libraries required for using pip in my specific HPC (search the ones in yours)
+module load Java/17.0.2 # Java will also be required to run Caper
+export PATH=$PATH:/scratch/user/chtaniguti/caper/bin/ # You can add this line to the .bashrc file usually located in the home directory to avoid the need of running it every time you connect
+```
+
+Run workflow:
+
+```{bash, eval=FALSE}
+caper hpc submit EmpiricalSNPCalling_develop.wdl -i EmpiricalSNPCalling_develop.inputs.json --singularity -p EmpiricalSNPCalling_develop.zip --leader-job-name SNPCalling --backend-file backend.conf
+```
+
+File `backend.conf` being the one that we edit in [Setup to run in High performance computing (HPC) with `Caper`](#Setup-to-run-in-High-performance-computing-(HPC)-with-Caper)
+
+Check run status:
+
+```{bash, eval=FALSE}
+squeue -u chtaniguti # replace by your user name
+
+# or
+
+caper hpc list
+```
+
+If required to abort the job, use `caper hpc abort <JOBID>`
+
+You can check the workflow log by opening the file named slurm-<JOBID>. The location of the outputs will be printed at the end of the log file. 
+
+```{bash, eval=FALSE}
+tail -f cromwell.out # Exit with Ctrl-C
+
+tail -n 100 cromwell.out
+```
+
+### Run Maps
+
+We suggest you to check the output VCF files before proceed to build the maps. You may want to apply specific filters according to your data set. Because we are using just a subset of samples (4) for this example, we cannot use the your output VCFs as input in the `Maps`. 
+
+### Download materials
+
+For the examplify `Maps` usage, we made available another subset for which we kept 61 individuals and a reduced the number of markers (~ 848) for chromosome 4. Download the example VCFs:
+
+```{bash, eval=FALSE}
+wget https://github.com/Cristianetaniguti/Reads2Map/raw/develop/tests/data/polyploid/vcfs_norm/gatk_Chr04_filt_example.vcf.gz
+```
+
+Select the workflow version in the [releases page](https://github.com/Cristianetaniguti/Reads2Map/releases) and download it:
+
+```{bash, eval=FALSE}
+wget https://github.com/Cristianetaniguti/Reads2Map/releases/download/EmpiricalMaps_develop/EmpiricalMaps_develop.wdl
+wget https://github.com/Cristianetaniguti/Reads2Map/releases/download/EmpiricalMaps_develop/EmpiricalMaps_develop.zip
+wget https://github.com/Cristianetaniguti/Reads2Map/releases/download/EmpiricalMaps_develop/EmpiricalMaps_develop.inputs.json
+```
+
+See [inputs description](https://cristianetaniguti.github.io/Tutorials/Reads2Map/EmpiricalReads.html) and edit the options and paths (absolute paths) in `EmpiricalMaps_develop.inputs.json`:
+
+```
+{
+  "Maps.ploidy": "4",
+  "Maps.dataset": {
+    "parent2": "P1",
+    "name": "roses",
+    "parent1": "P2",
+    "chromosome": "Chr04",
+    "cross": "F1",
+    "multiallelics": "false"
+  },
+  "Maps.max_cores": "2",
+  "Maps.run_supermassa":true,
+  "Maps.run_updog":true,
+  "Maps.run_polyrad":true,
+  "Maps.gatk_mchap": "FALSE",
+  "Maps.vcfs_counts_source": ["vcf"],
+  "Maps.vcfs_software": ["gatk"],
+  "Maps.filter_noninfo": "true",
+  "Maps.vcfs": ["/home/rose_lab/Reads2Map_tutorial_poly/gatk_Chr04_filt_example.vcf.gz"],
+  "Maps.replaceADbyMissing": "TRUE",
+  "Maps.global_errors":["0.05"]
+}
+```
+
+##### Running locally with Docker
+
+```{bash, eval=FALSE}
+pumbaa submit -w EmpiricalMaps_develop.wdl -i EmpiricalMaps_develop.inputs.json -d EmpiricalMaps_develop.zip
+```
+
+Once it finishes:
+
+```{bash, eval=FALSE}
+pumbaa q
+```
+
+```console
+2023/05/30 15:42:08 GET request to: http://127.0.0.1:8000/api/workflows/v1/query?submission=2023-05-23T15%3A42%3A08.771Z
++--------------------------------------+------+-------------------+----------+-----------+
+|              OPERATION               | NAME |       START       | DURATION |  STATUS   |
++--------------------------------------+------+-------------------+----------+-----------+
+| ba8c71d0-7863-4f78-b5d7-82035787ba13 | Maps | 2023-05-30 20h21m | 19m57s   | Succeeded |
++--------------------------------------+------+-------------------+----------+-----------+
+```
+
+```{bash, eval=FALSE}
+pumbaa outputs -o ba8c71d0-7863-4f78-b5d7-82035787ba13
+```
+
+```{bash, eval=FALSE}
+2023/05/30 15:42:55 GET request to: http://127.0.0.1:8000/api/workflows/v1/ba8c71d0-7863-4f78-b5d7-82035787ba13/outputs
+{
+   "Maps.EmpiricalReads_results": "/home/rose_lab/Reads2Map_tutorial_poly/cromwell-executions/Maps/8e27954a-f477-4db0-a2c9-70f86314914e/call-JointAllReports/execution/EmpiricalReads_results.tar.gz"
+}
+```
+
+The section `Visualize results` will show how to visualize diagnostic graphics from the `EmpiricalReads_results.tar.gz` file.
+
+##### Running in HPC system with SLURM + singularity
+
+[Load required libraries, add caper to PATH (if you still didn´t)](#Setup-to-run-in-High-performance-computing-(HPC)-with-Caper), and run the workflow.
+
+```{bash, eval=FALSE}
+caper hpc submit EmpiricalMaps_develop.wdl -i EmpiricalMaps_develop.inputs.json --singularity -p EmpiricalMaps_develop.zip --leader-job-name Maps --backend-file backend.conf
+```
+
+## Pair-end GBS polyploid example data
+
+### Download materials
 
 See an sample file format example for `pair-end` reads [here](https://github.com/Cristianetaniguti/Reads2Map/blob/develop/tests/data/polyploid/fastq/pair_end/samples_info.txt). This example file refer to roses dataset, to run it, use the [R. chinensis genome subset](https://github.com/Cristianetaniguti/Reads2Map/tree/develop/tests/data/polyploid/RchinensisV1.0). Below is an example of json input file for this dataset:
 
@@ -221,245 +828,9 @@ See an sample file format example for `pair-end` reads [here](https://github.com
 }
 ```
 
-#### If running locally with Docker
+Once downloaded and all input data are available, you can use same commands and workflows EmpiricalSNPCalling and EmpiricalMaps WDL and zip files described in sections `Running locally with Docker` and `Running in HPC system with SLURM + singularity`.
 
-```{bash, eval=FALSE}
-pumbaa submit -w EmpiricalSNPCalling_develop.wdl -i EmpiricalSNPCalling_develop.inputs.json -d EmpiricalSNPCalling_develop.zip
-```
-
-```console
-2023/05/25 17:43:05 POST request to: http://127.0.0.1:8000/api/workflows/v1
-🐖 Operation= 8a9f091e-53ba-4fe0-bc4a-e68b03751050 , Status=Submitted
-```
-
-You can check the job log in the terminal that the server is on. Or also check the job status with:
-
-```{bash, eval=FALSE}
-pumbaa q
-```
-
-```console
-2023/05/25 17:43:48 GET request to: http://127.0.0.1:8000/api/workflows/v1/query?submission=2023-05-18T17%3A43%3A48.269Z
-+--------------------------------------+-----------------------------+-------------------+----------+-----------+
-|              OPERATION               |            NAME             |       START       | DURATION |  STATUS   |
-+--------------------------------------+-----------------------------+-------------------+----------+-----------+
-| 392e2620-5174-4a0d-8ce3-15d71ce52bf4 | SNPCalling                  | 2023-05-25 22h43m | 37s      | Running   |
-```
-
-More details:
-
-```{bash, eval=FALSE}
-pumbaa metadata -o 392e2620-5174-4a0d-8ce3-15d71ce52bf4 
-```
-
-```console
-2023/05/25 18:04:16 GET request to: http://127.0.0.1:8000/api/workflows/v1/392e2620-5174-4a0d-8ce3-15d71ce52bf4/metadata?excludeKey=executionEvents&excludeKey=jes&excludeKey=inputs
-+-----------------------------+---------+---------------+---------+
-|            TASK             | ATTEMPT |    ELAPSED    | STATUS  |
-+-----------------------------+---------+---------------+---------+
-| CreateAlignmentFromFamilies | 1       | 58.559950841s | Running |
-| TasselGenotyping            | 1       | 56.529955802s | Running |
-+-----------------------------+---------+---------------+---------+
-```
-
-Once is done:
-
-```console
-2023/05/25 18:27:11 GET request to: http://127.0.0.1:8000/api/workflows/v1/392e2620-5174-4a0d-8ce3-15d71ce52bf4/metadata?excludeKey=executionEvents&excludeKey=jes&excludeKey=inputs
-+-----------------------------+---------+-----------+--------+
-|            TASK             | ATTEMPT |  ELAPSED  | STATUS |
-+-----------------------------+---------+-----------+--------+
-| CreateAlignmentFromFamilies | 1       | 1m21.943s | Done   |
-| GatkGenotyping              | 1       | 4m33.297s | Done   |
-| TasselGenotyping            | 1       | 2m4.906s  | Done   |
-+-----------------------------+---------+-----------+--------+
-```
-
-Check the output paths:
-
-```{bash, eval=FALSE}
-pumbaa outputs -o 392e2620-5174-4a0d-8ce3-15d71ce52bf4
-```
-
-```console
-2023/05/25 18:29:20 GET request to: http://127.0.0.1:8000/api/workflows/v1/392e2620-5174-4a0d-8ce3-15d71ce52bf4/outputs
-{
-   "SNPCalling.Plots": "/home/chtaniguti/cromwell-executions/SNPCalling/392e2620-5174-4a0d-8ce3-15d71ce52bf4/call-GatkGenotyping/GatkGenotyping/a092e922-10d7-46b0-b71d-8a2c11375faf/call-HardFilteringEmp/HardFilteringEmp/e852c953-4186-4ff4-bea0-bcf6794af27d/call-QualPlots/execution/QualPlots.tar.gz",
-   "SNPCalling.freebayes_vcfEval": null,
-   "SNPCalling.gatk_multi_vcf": null,
-   "SNPCalling.gatk_vcfEval": "/home/chtaniguti/cromwell-executions/SNPCalling/392e2620-5174-4a0d-8ce3-15d71ce52bf4/call-GatkGenotyping/GatkGenotyping/a092e922-10d7-46b0-b71d-8a2c11375faf/call-Normalization/Normalization/1cf815cf-4954-419a-869b-e7a33798687a/call-VariantEval/execution/vcfEval.txt",
-   "SNPCalling.merged_bam": "/home/chtaniguti/cromwell-executions/SNPCalling/392e2620-5174-4a0d-8ce3-15d71ce52bf4/call-CreateAlignmentFromFamilies/CreateAlignmentFromFamilies/c2f27156-397d-4184-8620-0e7d2658edbf/call-MergeBams/execution/merged.bam",
-   "SNPCalling.stacks_multiallelics": null,
-   "SNPCalling.vcfs": [
-      "/home/chtaniguti/cromwell-executions/SNPCalling/392e2620-5174-4a0d-8ce3-15d71ce52bf4/call-GatkGenotyping/GatkGenotyping/a092e922-10d7-46b0-b71d-8a2c11375faf/call-Normalization/Normalization/1cf815cf-4954-419a-869b-e7a33798687a/call-BiallelicNormalization/execution/vcf_norm.vcf.gz",
-      "/home/chtaniguti/cromwell-executions/SNPCalling/392e2620-5174-4a0d-8ce3-15d71ce52bf4/call-TasselGenotyping/TasselGenotyping/a978418e-60a6-4c4b-994e-c05a0ca19c37/call-TasselAfterAlign/execution/tassel.vcf"
-   ],
-   "SNPCalling.vcfs_counts_source": [
-      "vcf",
-      "vcf"
-   ],
-   "SNPCalling.vcfs_software": [
-      "gatk",
-      "tassel"
-   ]
-}
-
-```
-
-Or interactively navigate through the tasks:
-
-```{bash, eval=FALSE}
-pumbaa navigate -o 392e2620-5174-4a0d-8ce3-15d71ce52bf4
-```
-
-```console
-2023/05/25 18:32:40 GET request to: http://127.0.0.1:8000/api/workflows/v1/392e2620-5174-4a0d-8ce3-15d71ce52bf4/metadata?excludeKey=executionEvents&excludeKey=submittedFiles&excludeKey=jes&excludeKey=inputs
-Workflow: SNPCalling
-
-Use the arrow keys to navigate: ↓ ↑ → ←
-? Select a task:
-  ▸ GatkGenotyping
-    CreateAlignmentFromFamilies
-    TasselGenotyping
-```
-
-#### In HPC system with SLURM + singularity
-
-```{bash, eval=FALSE}
-caper hpc submit EmpiricalSNPCalling_develop.wdl -i EmpiricalSNPCalling_develop.inputs.json --singularity -p EmpiricalSNPCalling_develop.zip --leader-job-name SNPCalling --backend-file backend.conf
-```
-
-File `backend.conf` being the one that we edit in [Setup to run in High performance computing (HPC) with `Caper`](#Setup-to-run-in-High-performance-computing-(HPC)-with-Caper)
-
-Check run status:
-
-```{bash, eval=FALSE}
-squeue -u chtaniguti
-
-# or
-
-caper hpc list
-```
-
-If required to abort the job, use `caper hpc abort <JOBID>`
-
-You can check the workflow log by opening the file named slurm-<JOBID>. The location of the outputs will be printed at the end of the log file. 
-
-```{bash, eval=FALSE}
-tail -f cromwell.out # Exit with Ctrl-C
-
-tail -n 100 cromwell.out
-```
-
-```console
-2023-05-30 14:44:57,128 cromwell-system-akka.dispatchers.engine-dispatcher-31 INFO  - SingleWorkflowRunnerActor workflow finished with status 'Succeeded'.
-{
-  "outputs": {
-    "SNPCalling.vcfs_software": ["gatk"],
-    "SNPCalling.gatk_multi_vcf": null,
-    "SNPCalling.vcfs_counts_source": ["vcf"],
-    "SNPCalling.Plots": "/scratch/user/chtaniguti/Reads2Map/SNPCalling/34cf00db-9ba8-4eb2-97fd-975eb58a686a/call-GatkGenotyping/GatkGenotyping/6e6e1a4a-b917-402f-ad47-6474be5331df/call-HardFilteringEmp/HardFilteringEmp/ceda7b1d-f608-4777-b332-476a8146894c/call-QualPlots/execution/QualPlots.tar.gz",
-    "SNPCalling.merged_bam": "/scratch/user/chtaniguti/Reads2Map/SNPCalling/34cf00db-9ba8-4eb2-97fd-975eb58a686a/call-CreateAlignmentFromFamilies/CreateAlignmentFromFamilies/3906d99d-8d72-47f1-82ba-b29709ae7058/call-MergeBams/execution/merged.bam",
-    "SNPCalling.freebayes_vcfEval": null,
-    "SNPCalling.stacks_multiallelics": null,
-    "SNPCalling.gatk_vcfEval": "/scratch/user/chtaniguti/Reads2Map/SNPCalling/34cf00db-9ba8-4eb2-97fd-975eb58a686a/call-GatkGenotyping/GatkGenotyping/6e6e1a4a-b917-402f-ad47-6474be5331df/call-Normalization/Normalization/be76cd00-c036-4704-87d9-b6533466d21a/call-VariantEval/execution/vcfEval.txt",
-    "SNPCalling.vcfs": ["/scratch/user/chtaniguti/Reads2Map/SNPCalling/34cf00db-9ba8-4eb2-97fd-975eb58a686a/call-GatkGenotyping/GatkGenotyping/6e6e1a4a-b917-402f-ad47-6474be5331df/call-Normalization/Normalization/be76cd00-c036-4704-87d9-b6533466d21a/call-BiallelicNormalization/execution/vcf_norm.vcf.gz"]
-  },
-  "id": "34cf00db-9ba8-4eb2-97fd-975eb58a686a"
-}
-```
-
-## Run Maps
-
-We suggest you to check the output VCF files before proceed to build the maps. You may want to apply specific filters according to your data set. Because we are using just a subset of samples (4) for this example, we cannot use the output VCF from the `SNPCalling` as input in the `Maps`. For the `Maps` we also created a subset but this time reducing the number of markers. Download the example VCFs:
-
-```{bash, eval=FALSE}
-wget https://github.com/Cristianetaniguti/Reads2Map/raw/main/tests/data/Ptremula_PRJNA395596_subset/snpcalling_vcfs/gatk_fullpop/gatk_bam_norm_filt.recode.vcf.gz
-wget https://github.com/Cristianetaniguti/Reads2Map/raw/main/tests/data/Ptremula_PRJNA395596_subset/snpcalling_vcfs/gatk_fullpop/gatk_vcf_norm_filt.recode.vcf.gz
-wget https://github.com/Cristianetaniguti/Reads2Map/raw/main/tests/data/Ptremula_PRJNA395596_subset/snpcalling_vcfs/freebayes_fullpop/freebayes_bam_norm_filt.recode.vcf.gz
-wget https://github.com/Cristianetaniguti/Reads2Map/raw/main/tests/data/Ptremula_PRJNA395596_subset/snpcalling_vcfs/freebayes_fullpop/freebayes_vcf_norm_filt.recode.vcf.gz
-```
-
-Select the workflow version in the [releases page](https://github.com/Cristianetaniguti/Reads2Map/releases) and download it:
-
-```{bash, eval=FALSE}
-wget https://github.com/Cristianetaniguti/Reads2Map/releases/download/EmpiricalMaps_develop/EmpiricalMaps_develop.wdl
-wget https://github.com/Cristianetaniguti/Reads2Map/releases/download/EmpiricalMaps_develop/EmpiricalMaps_develop.zip
-wget https://github.com/Cristianetaniguti/Reads2Map/releases/download/EmpiricalMaps_develop/EmpiricalMaps_develop.inputs.json
-```
-
-See [inputs description](https://cristianetaniguti.github.io/Tutorials/Reads2Map/EmpiricalReads.html) and edit the options and paths (absolute paths) in `EmpiricalMaps_develop.inputs.json`:
-
-```
-{
-    "Maps.dataset": {
-      "parent2": "PT_M",
-      "name": "populus_sub",
-      "parent1": "PT_F",
-      "chromosome": "Chr10",
-      "cross": "F1",
-      "multiallelics": true
-    },
-    "Maps.max_cores": 2,
-    "Maps.run_supermassa": "false",
-    "Maps.run_gusmap": "false",
-    "Maps.run_polyrad": "false",
-    "Maps.run_updog": "true",
-    "Maps.ploidy": 2,
-    "Maps.gatk_mchap": "FALSE",
-    "Maps.vcfs_counts_source": ["vcf","bam","vcf","bam"],
-    "Maps.vcfs": ["/home/chtaniguti/Reads2Map_tutorial/gatk_bam_norm_filt.recode.vcf.gz",       
-                  "/home/chtaniguti/Reads2Map_tutorial/gatk_vcf_norm_filt.recode.vcf.gz",          
-                  "/home/chtaniguti/Reads2Map_tutorial/freebayes_bam_norm_filt.recode.vcf.gz",   
-                  "/home/chtaniguti/Reads2Map_tutorial/freebayes_vcf_norm_filt.recode.vcf.gz"],                             
-    "Maps.vcfs_software": ["gatk", "gatk", "freebayes", "freebayes"],
-    "Maps.filter_noninfo": true,
-    "Maps.replaceADbyMissing": true,
-    "Maps.global_errors": ["0.01","0.05"],
-    "Maps.genoprob_error": true,
-    "Maps.genoprob_global_errors":["0.01","0.05"]
-}
-```
-
-#### If running locally with Docker
-
-```{bash, eval=FALSE}
-pumbaa submit -w EmpiricalMaps_develop.wdl -i EmpiricalMaps_develop.inputs.json -d EmpiricalMaps_develop.zip
-```
-
-Once it finishes:
-
-```{bash, eval=FALSE}
-pumbaa q
-```
-
-```console
-2023/05/30 15:42:08 GET request to: http://127.0.0.1:8000/api/workflows/v1/query?submission=2023-05-23T15%3A42%3A08.771Z
-+--------------------------------------+------+-------------------+----------+-----------+
-|              OPERATION               | NAME |       START       | DURATION |  STATUS   |
-+--------------------------------------+------+-------------------+----------+-----------+
-| 8e27954a-f477-4db0-a2c9-70f86314914e | Maps | 2023-05-30 20h21m | 19m57s   | Succeeded |
-+--------------------------------------+------+-------------------+----------+-----------+
-```
-
-```{bash, eval=FALSE}
-pumbaa outputs -o 8e27954a-f477-4db0-a2c9-70f86314914e
-```
-
-```{bash, eval=FALSE}
-2023/05/30 15:42:55 GET request to: http://127.0.0.1:8000/api/workflows/v1/8e27954a-f477-4db0-a2c9-70f86314914e/outputs
-{
-   "Maps.EmpiricalReads_results": "/home/chtaniguti/Reads2Map_tutorial/cromwell-executions/Maps/8e27954a-f477-4db0-a2c9-70f86314914e/call-JointAllReports/execution/EmpiricalReads_results.tar.gz"
-}
-```
-
-#### In HPC system with SLURM + singularity
-
-```{bash, eval=FALSE}
-caper hpc submit EmpiricalMaps_develop.wdl -i EmpiricalMaps_develop.inputs.json --singularity -p EmpiricalMaps_develop.zip --leader-job-name Maps --backend-file backend.conf
-```
-
-## Visualize results
+### Visualize results
 
 The `Reads2MapApp` is a shiny app built to visualize the results from `Reads2Map`. Install it in R with:
 
@@ -493,7 +864,7 @@ Here are some characteristics that you should check before making your decision:
 
 * **Marker type**: In outcrossing populations, it is important to have markers that have recombination information for both parents. These are ab x aa (OneMap notation: D1.10), aa x ab (OneMap notation: D2.15), and ab x ab (OneMap notation: B3.7). Avoid approaches that provide only ab x aa or aa x ab in a single chromosome. 
 
-Once you selected the approach that provides the best results for your data set, you can input the respective VCF file into R and follow `OneMap` vignette to build the map for the complete data set. 
+Once you selected the approach that provides the best results for your data set, you can input the respective VCF file into R and follow `OneMap` or `MAPpoly` vignettes to build the map for the complete data set. 
 
 For example, if you choose the combination of GATK for SNP calling and updog for genotype calling, the VCF will be available at:
 
@@ -509,7 +880,7 @@ This will only contain the biallelic markers. If you wish to add the multialleli
 
 Finding these intermediary files can be a bit tricky due to the high number of directories generated. If you are using `pumbaa`, the `navigate` function can be useful for that. The graphs generated by `womtools` and are available at the [workflows description documents](https://cristianetaniguti.github.io/Tutorials/Reads2Map/EmpiricalReads.html) are also useful to help you to identify the files location.
 
-## Adapt tasks and run sub-workflows
+# Adapt tasks and run sub-workflows
 
 If you want to modify the workflows and contribute with their development you can create a Reads2Map repository fork in your github account and clone the fork into your local machine:
 
@@ -605,7 +976,7 @@ java -jar womtool.jar inputs Reads2Map/subworkflows/gatk_genotyping.wdl
 
 * `pipelines`: if you want to change the main structure of the workflows
 
-## Contribute
+# Contribute
 
 Contributions are more than welcome! Please, submit pull requests to the `develop` branch. 
 
